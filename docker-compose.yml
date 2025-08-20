@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  oracle-db:
+    image: container-registry.oracle.com/database/free
+    container_name: oracle-db
+    ports:
+      - "1521:1521"
+      - "5500:5500"
+    environment:
+      - ORACLE_PWD=MySecurePass123
+      - APP_USER=kenny
+      - APP_USER_PASSWORD=StrongPass456
+    volumes:
+      - oracle-data:/opt/oracle/oradata
+    restart: unless-stopped
+  oracle-db-marn:
+    image: container-registry.oracle.com/database/free
+    container_name: oracle-db-marn
+    ports:
+      - "1522:1521"
+      - "5501:5500"
+    environment:
+      - ORACLE_PWD=MySecurePass567
+      - APP_USER=pao
+      - APP_USER_PASSWORD=StrongPass567
+    volumes:
+      - oracle-data-marn:/opt/oracle/oradata
+    restart: unless-stopped
+
+volumes:
+  oracle-data:
+  oracle-data-marn:

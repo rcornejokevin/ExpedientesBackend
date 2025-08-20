@@ -1,0 +1,12 @@
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/Support/bin/Debug/net9.0/Support.deps.json
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/Support/bin/Debug/net9.0/Support.dll
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/Support/bin/Debug/net9.0/Support.pdb
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/Support/obj/Debug/net9.0/Support.csproj.AssemblyReference.cache
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/Support/obj/Debug/net9.0/Support.GeneratedMSBuildEditorConfig.editorconfig
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/Support/obj/Debug/net9.0/Support.AssemblyInfoInputs.cache
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/Support/obj/Debug/net9.0/Support.AssemblyInfo.cs
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/Support/obj/Debug/net9.0/Support.csproj.CoreCompileInputs.cache
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/Support/obj/Debug/net9.0/Support.dll
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/Support/obj/Debug/net9.0/refint/Support.dll
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/Support/obj/Debug/net9.0/Support.pdb
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/Support/obj/Debug/net9.0/ref/Support.dll

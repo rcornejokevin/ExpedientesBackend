@@ -1,0 +1,17 @@
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/BusinessLogic/bin/Debug/net9.0/BusinessLogic.deps.json
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/BusinessLogic/bin/Debug/net9.0/BusinessLogic.dll
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/BusinessLogic/bin/Debug/net9.0/BusinessLogic.pdb
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/BusinessLogic/bin/Debug/net9.0/Support.dll
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/BusinessLogic/bin/Debug/net9.0/Support.pdb
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/BusinessLogic/obj/Debug/net9.0/BusinessLogic.csproj.AssemblyReference.cache
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/BusinessLogic/obj/Debug/net9.0/BusinessLogic.GeneratedMSBuildEditorConfig.editorconfig
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/BusinessLogic/obj/Debug/net9.0/BusinessLogic.AssemblyInfoInputs.cache
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/BusinessLogic/obj/Debug/net9.0/BusinessLogic.AssemblyInfo.cs
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/BusinessLogic/obj/Debug/net9.0/BusinessLogic.csproj.CoreCompileInputs.cache
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/BusinessLogic/obj/Debug/net9.0/Business.CF5D6E35.Up2Date
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/BusinessLogic/obj/Debug/net9.0/BusinessLogic.dll
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/BusinessLogic/obj/Debug/net9.0/refint/BusinessLogic.dll
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/BusinessLogic/obj/Debug/net9.0/BusinessLogic.pdb
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/BusinessLogic/obj/Debug/net9.0/ref/BusinessLogic.dll
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/BusinessLogic/bin/Debug/net9.0/DBHandler.dll
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/BusinessLogic/bin/Debug/net9.0/DBHandler.pdb

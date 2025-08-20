@@ -1,0 +1,14 @@
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/DBHandler/bin/Debug/net9.0/DBHandler.deps.json
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/DBHandler/bin/Debug/net9.0/DBHandler.runtimeconfig.json
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/DBHandler/bin/Debug/net9.0/DBHandler.dll
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/DBHandler/bin/Debug/net9.0/DBHandler.pdb
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/DBHandler/obj/Debug/net9.0/DBHandler.csproj.AssemblyReference.cache
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/DBHandler/obj/Debug/net9.0/DBHandler.GeneratedMSBuildEditorConfig.editorconfig
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/DBHandler/obj/Debug/net9.0/DBHandler.AssemblyInfoInputs.cache
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/DBHandler/obj/Debug/net9.0/DBHandler.AssemblyInfo.cs
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/DBHandler/obj/Debug/net9.0/DBHandler.csproj.CoreCompileInputs.cache
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/DBHandler/obj/Debug/net9.0/DBHandler.dll
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/DBHandler/obj/Debug/net9.0/refint/DBHandler.dll
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/DBHandler/obj/Debug/net9.0/DBHandler.pdb
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/DBHandler/obj/Debug/net9.0/DBHandler.genruntimeconfig.cache
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/DBHandler/obj/Debug/net9.0/ref/DBHandler.dll

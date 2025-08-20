@@ -1,0 +1,70 @@
+using Microsoft.EntityFrameworkCore;
+using DBHandler.Context;
+using Support.Items;
+using DBHandler.Service.Catalog;
+using DBHandler.Service.Security;
+using BusinessLogic.Services;
+using DBHandler.Models;
+var builder = WebApplication.CreateBuilder(args);
+//Cors
+var localCors = "MyCors";
+
+builder.Services.AddCors(opt =>
+{
+    opt.AddPolicy(localCors, b =>
+    {
+        b.WithOrigins("http://localhost:5173")   // EXACTO: esquema + host + puerto
+         .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+         .WithHeaders("Content-Type", "Authorization", "X-Requested-With", "X-CSRF-Token")
+         .AllowCredentials(); // quítalo si NO usas cookies
+    });
+});
+
+// Agrega servicios
+builder.Services.AddControllers();
+builder.Services.AddOpenApi();
+
+builder.Services.AddDbContext<DBHandlerContext>(options =>
+    options.UseOracle(builder.Configuration.GetConnectionString("OracleDB"))
+    .UseLazyLoadingProxies());
+
+builder.Services.AddDbContext<LoginDbContext>(options =>
+    options.UseOracle(builder.Configuration.GetConnectionString("OracleDBUser")));
+
+builder.Services.AddScoped<Jwt>();
+builder.Services.AddScoped<CampoService>();
+builder.Services.AddScoped<FlujoService>();
+builder.Services.AddScoped<EtapaService>();
+builder.Services.AddScoped<EtapaDetalleService>();
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<UsuarioService>();
+builder.Services.AddScoped<CampoLogic>();
+builder.Services.AddScoped<FileLogic>();
+builder.Services.AddScoped<CasesService>();
+builder.Services.AddScoped<ExpedienteService>();
+builder.Services.AddScoped<ExpedienteDetalleService>();
+var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+    app.MapOpenApi();
+}
+if (app.Environment.IsProduction())
+{
+    app.UseExceptionHandler("/error");
+}
+app.UseHttpsRedirection();
+
+app.UseCors(localCors);
+
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Map("/error", (HttpContext context) =>
+{
+    return Results.Problem("Ocurrió un error inesperado.");
+});
+
+app.Run();
