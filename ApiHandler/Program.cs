@@ -5,6 +5,7 @@ using DBHandler.Service.Catalog;
 using DBHandler.Service.Security;
 using BusinessLogic.Services;
 using DBHandler.Models;
+using Microsoft.AspNetCore.Mvc;
 var builder = WebApplication.CreateBuilder(args);
 //Cors
 var localCors = "MyCors";
@@ -21,7 +22,13 @@ builder.Services.AddCors(opt =>
 });
 
 // Agrega servicios
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        // Permite que el controlador maneje ModelState.IsValid
+        options.SuppressModelStateInvalidFilter = true;
+
+    });
 builder.Services.AddOpenApi();
 
 builder.Services.AddDbContext<DBHandlerContext>(options =>

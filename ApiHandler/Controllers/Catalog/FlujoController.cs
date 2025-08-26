@@ -78,6 +78,23 @@ namespace ApiHandler.Controllers.Catalog
             {
                 return Unauthorized();
             }
+            if (!ModelState.IsValid)
+            {
+                var validationErrors = ModelState
+                    .Where(kvp => kvp.Value?.Errors?.Count > 0)
+                    .ToDictionary(
+                        kvp => kvp.Key,
+                        kvp => kvp.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
+                    );
+
+                var badResponse = new ResponseApi
+                {
+                    code = "400",
+                    message = "Error de validación de campo",
+                    data = validationErrors
+                };
+                return BadRequest(badResponse);
+            }
             ResponseApi response = new ResponseApi();
             Flujo flujo = new Flujo(0, flujoRequest.nombre, flujoRequest.detalle, true);
             try
@@ -103,6 +120,23 @@ namespace ApiHandler.Controllers.Catalog
             if (!jwt.ValidateJwtToken(Authorization))
             {
                 return Unauthorized();
+            }
+            if (!ModelState.IsValid)
+            {
+                var validationErrors = ModelState
+                    .Where(kvp => kvp.Value?.Errors?.Count > 0)
+                    .ToDictionary(
+                        kvp => kvp.Key,
+                        kvp => kvp.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
+                    );
+
+                var badResponse = new ResponseApi
+                {
+                    code = "400",
+                    message = "Error de validación de campo",
+                    data = validationErrors
+                };
+                return BadRequest(badResponse);
             }
             ResponseApi response = new ResponseApi();
             Flujo? flujo = await flujoService.GetByIdAsync(flujoRequest.id);
