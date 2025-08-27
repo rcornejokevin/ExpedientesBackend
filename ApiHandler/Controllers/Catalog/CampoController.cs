@@ -88,7 +88,23 @@ namespace ApiHandler.Controllers.Catalog
             {
                 return Unauthorized();
             }
+            if (!ModelState.IsValid)
+            {
+                var validationErrors = ModelState
+                    .Where(kvp => kvp.Value?.Errors?.Count > 0)
+                    .ToDictionary(
+                        kvp => kvp.Key,
+                        kvp => kvp.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
+                    );
 
+                var badResponse = new ResponseApi
+                {
+                    code = "400",
+                    message = "Error de validación de campo",
+                    data = validationErrors
+                };
+                return BadRequest(badResponse);
+            }
             ResponseApi response = new ResponseApi();
             Campo campo = new Campo();
             campo.Nombre = campoRequest.nombre;
@@ -131,6 +147,23 @@ namespace ApiHandler.Controllers.Catalog
             if (!jwt.ValidateJwtToken(Authorization))
             {
                 return Unauthorized();
+            }
+            if (!ModelState.IsValid)
+            {
+                var validationErrors = ModelState
+                    .Where(kvp => kvp.Value?.Errors?.Count > 0)
+                    .ToDictionary(
+                        kvp => kvp.Key,
+                        kvp => kvp.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
+                    );
+
+                var badResponse = new ResponseApi
+                {
+                    code = "400",
+                    message = "Error de validación de campo",
+                    data = validationErrors
+                };
+                return BadRequest(badResponse);
             }
             ResponseApi response = new ResponseApi();
             Campo? campo = await campoService.GetByIdAsync(campoRequest.id);
