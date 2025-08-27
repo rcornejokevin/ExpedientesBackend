@@ -18,6 +18,7 @@ namespace DBHandler.Service.Catalog
         {
             return await dbContext.EtapaDetalles
                 .Where(u => u.Activo)
+                .OrderBy(u => u.Orden)
                 .ToListAsync();
         }
 

@@ -18,6 +18,14 @@ namespace DBHandler.Service.Catalog
         {
             return await dbContext.Etapas
                 .Where(u => u.Activo)
+                .OrderBy(u => u.Orden)
+                .ToListAsync();
+        }
+        public async Task<List<Etapa>> GetAllByFlujoIdAsync(int flujoId)
+        {
+            return await dbContext.Etapas
+                .Where(u => u.FlujoId == flujoId)
+                .OrderBy(u => u.Orden)
                 .ToListAsync();
         }
         public async Task<Etapa> AddAsync(Etapa etapa)
