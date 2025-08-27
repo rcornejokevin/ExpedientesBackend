@@ -51,11 +51,30 @@ namespace ApiHandler.Controllers.Catalog
             {
                 return Unauthorized();
             }
+            if (!ModelState.IsValid)
+            {
+                var validationErrors = ModelState
+                    .Where(kvp => kvp.Value?.Errors?.Count > 0)
+                    .ToDictionary(
+                        kvp => kvp.Key,
+                        kvp => kvp.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
+                    );
+
+                var badResponse = new ResponseApi
+                {
+                    code = "400",
+                    message = "Error de validación de campo",
+                    data = validationErrors
+                };
+                return BadRequest(badResponse);
+            }
+            List<EtapaDb> listEtapaByFlujoId = await etapaService.GetAllByFlujoIdAsync(etapaRequest.flujoId);
             ResponseApi response = new ResponseApi();
             EtapaDb etapa = new EtapaDb();
             etapa.Nombre = etapaRequest.nombre;
             etapa.Activo = true;
-            etapa.Orden = etapaRequest.orden;
+            etapa.Orden = listEtapaByFlujoId.Count() + 1;
+            etapa.Detalle = etapaRequest.detalle;
             etapa.FlujoId = etapaRequest.flujoId;
             try
             {
@@ -88,6 +107,23 @@ namespace ApiHandler.Controllers.Catalog
             {
                 return Unauthorized();
             }
+            if (!ModelState.IsValid)
+            {
+                var validationErrors = ModelState
+                    .Where(kvp => kvp.Value?.Errors?.Count > 0)
+                    .ToDictionary(
+                        kvp => kvp.Key,
+                        kvp => kvp.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
+                    );
+
+                var badResponse = new ResponseApi
+                {
+                    code = "400",
+                    message = "Error de validación de campo",
+                    data = validationErrors
+                };
+                return BadRequest(badResponse);
+            }
             ResponseApi response = new ResponseApi();
             EtapaDb? etapa = await etapaService.GetEtapaByIdAsync(etapaRequest.id);
             if (etapa == null)
@@ -97,7 +133,7 @@ namespace ApiHandler.Controllers.Catalog
                 return NotFound(response);
             }
             etapa.Nombre = etapaRequest.nombre;
-            etapa.Orden = etapaRequest.orden;
+            etapa.Detalle = etapaRequest.detalle;
             etapa.FlujoId = etapaRequest.flujoId;
             try
             {
@@ -120,6 +156,45 @@ namespace ApiHandler.Controllers.Catalog
             response.code = "000";
             response.message = "Etapa editada correctamente";
             response.data = etapa;
+            return Ok(response);
+        }
+        [HttpPut("orden")]
+        public async Task<IActionResult> Orden([FromHeader] string Authorization, [FromBody] EditOrdenEtapaRequest etapaRequest)
+        {
+            if (!jwt.ValidateJwtToken(Authorization)) return Unauthorized();
+
+            if (!ModelState.IsValid)
+            {
+                var validationErrors = ModelState
+                    .Where(kvp => kvp.Value?.Errors?.Count > 0)
+                    .ToDictionary(
+                        kvp => kvp.Key,
+                        kvp => kvp.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
+                    );
+
+                var badResponse = new ResponseApi
+                {
+                    code = "400",
+                    message = "Error de validación de campo",
+                    data = validationErrors
+                };
+                return BadRequest(badResponse);
+            }
+
+            ResponseApi response = new ResponseApi();
+            foreach (var item in etapaRequest.items)
+            {
+                EtapaDb? etapa = await etapaService.GetEtapaByIdAsync(item.id);
+                if (etapa != null)
+                {
+                    etapa.Orden = item.orden;
+                    await etapaService.EditAsync(etapa);
+                }
+            }
+
+            response.code = "000";
+            response.message = "Etapa ordenada correctamente";
+            response.data = new { };
             return Ok(response);
         }
         [HttpDelete("{id}")]
