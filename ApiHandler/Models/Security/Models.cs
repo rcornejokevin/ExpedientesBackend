@@ -14,7 +14,7 @@ namespace ApiHandler.Models.Security
         [Required]
         public string username { get; set; } = String.Empty;
         [Required]
-        [RegularExpression("^(Administrador|moderator|user)$", ErrorMessage = "Perfil inválido")]
+        [RegularExpression("^(Administrador|Usuario)$", ErrorMessage = "Perfil inválido")]
         public string perfil { get; set; } = String.Empty;
     }
     public class EditUsuarioRequest
@@ -24,7 +24,7 @@ namespace ApiHandler.Models.Security
         [Required]
         public string username { get; set; } = String.Empty;
         [Required]
-        [RegularExpression("^(Administrador|moderator|user)$", ErrorMessage = "Perfil inválido")]
+        [RegularExpression("^(Administrador|Usuario)$", ErrorMessage = "Perfil inválido")]
         public string perfil { get; set; } = String.Empty;
     }
 }

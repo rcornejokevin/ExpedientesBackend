@@ -207,6 +207,45 @@ namespace ApiHandler.Controllers.Catalog
             response.data = campo;
             return Ok(response);
         }
+        [HttpPut("orden")]
+        public async Task<IActionResult> Orden([FromHeader] string Authorization, [FromBody] EditOrdenEtapaRequest etapaRequest)
+        {
+            if (!jwt.ValidateJwtToken(Authorization)) return Unauthorized();
+
+            if (!ModelState.IsValid)
+            {
+                var validationErrors = ModelState
+                    .Where(kvp => kvp.Value?.Errors?.Count > 0)
+                    .ToDictionary(
+                        kvp => kvp.Key,
+                        kvp => kvp.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
+                    );
+
+                var badResponse = new ResponseApi
+                {
+                    code = "400",
+                    message = "Error de validación de campo",
+                    data = validationErrors
+                };
+                return BadRequest(badResponse);
+            }
+
+            ResponseApi response = new ResponseApi();
+            foreach (var item in etapaRequest.items)
+            {
+                Campo? campo = await campoService.GetByIdAsync(item.id);
+                if (campo != null)
+                {
+                    campo.Orden = item.orden;
+                    await campoService.EditAsync(campo);
+                }
+            }
+
+            response.code = "000";
+            response.message = "Campo ordenada correctamente";
+            response.data = new { };
+            return Ok(response);
+        }
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromHeader] string Authorization, int id)
         {
