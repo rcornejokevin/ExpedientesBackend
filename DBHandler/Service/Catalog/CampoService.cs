@@ -14,6 +14,7 @@ namespace DBHandler.Service.Catalog
         {
             return await _context.Campos
                 .Where(u => u.Activo)
+                .OrderBy(u => u.Orden)
                 .ToListAsync();
         }
         public async Task<Campo?> GetByIdAsync(int id)

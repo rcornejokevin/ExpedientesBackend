@@ -7,13 +7,13 @@ namespace BusinessLogic.Services
     {
         public CampoService campoService;
         public EtapaService etapaService;
-        public EtapaDetalleService etapaDetalleService;
+        public FlujoService flujoService;
 
-        public CampoLogic(CampoService campoService, EtapaService etapaService, EtapaDetalleService etapaDetalleService)
+        public CampoLogic(CampoService campoService, EtapaService etapaService, EtapaDetalleService etapaDetalleService, FlujoService flujoService)
         {
             this.campoService = campoService;
             this.etapaService = etapaService;
-            this.etapaDetalleService = etapaDetalleService;
+            this.flujoService = flujoService;
         }
         public async Task<CampoDB> addCampo(CampoDB campo)
         {
@@ -28,11 +28,11 @@ namespace BusinessLogic.Services
         }
         public async Task<bool> checkToSave(CampoDB campo)
         {
-            if (campo.EtapaId == 0 && campo.EtapaDetalleId == 0)
+            if (campo.EtapaId == 0 && campo.FlujoId == 0)
             {
                 throw new ArgumentException("Campo debe tener una etapa o subetapa asignada.");
             }
-            if (campo.EtapaId != 0)
+            if (campo.EtapaId != 0 && campo.EtapaId > 0)
             {
                 Etapa? etapa = await etapaService.GetEtapaByIdAsync(campo.EtapaId ?? 0);
                 if (etapa == null)
@@ -40,12 +40,12 @@ namespace BusinessLogic.Services
                     throw new KeyNotFoundException("Etapa no encontrada.");
                 }
             }
-            if (campo.EtapaDetalleId != 0)
+            if (campo.FlujoId != 0 && campo.FlujoId > 0)
             {
-                Etapa? etapa = await etapaService.GetEtapaByIdAsync(campo.EtapaId ?? 0);
-                if (etapa == null)
+                Flujo? flujo = await flujoService.GetByIdAsync(campo.FlujoId ?? 0);
+                if (flujo == null)
                 {
-                    throw new KeyNotFoundException("Sub Etapa no encontrada.");
+                    throw new KeyNotFoundException("Flujo no encontrado");
                 }
             }
             return true;

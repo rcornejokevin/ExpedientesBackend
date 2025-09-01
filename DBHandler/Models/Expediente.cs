@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 namespace DBHandler.Models
 {
@@ -25,9 +26,11 @@ namespace DBHandler.Models
         [ForeignKey("Etapa")]
         [Required]
         public int EtapaId { get; set; }
+        [JsonIgnore]
         public virtual Etapa Etapa { get; set; } = null!;
         [ForeignKey("EtapaDetalle")]
         public int? EtapaDetalleId { get; set; }
+        [JsonIgnore]
         public virtual EtapaDetalle EtapaDetalle { get; set; } = null!;
         [Required]
         public bool Activo { get; set; }

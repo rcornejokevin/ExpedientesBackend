@@ -27,5 +27,7 @@ namespace DBHandler.Models
         public bool Activo { get; set; } = true;
         [JsonIgnore]
         public virtual ICollection<Etapa> Etapas { get; set; } = new List<Etapa>();
+        [JsonIgnore]
+        public virtual ICollection<Campo> Campos { get; set; } = new List<Campo>();
     }
 }

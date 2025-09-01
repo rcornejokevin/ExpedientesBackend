@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 namespace DBHandler.Models
 {
     [Table("ExpedienteDetalle")]
@@ -15,6 +16,7 @@ namespace DBHandler.Models
         public int ExpedienteId { get; set; }
         [Required]
         public string Responsable { get; set; } = String.Empty;
+        [JsonIgnore]
         public virtual Expediente Expediente { get; set; } = null!;
     }
 }

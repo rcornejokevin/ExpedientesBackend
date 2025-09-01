@@ -25,6 +25,7 @@ namespace DBHandler.Models
         [ForeignKey("Flujo")]
         [Required]
         public int FlujoId { get; set; }
+        [JsonIgnore]
         public virtual Flujo Flujo { get; set; } = null!;
         [JsonIgnore]
         public virtual ICollection<EtapaDetalle> EtapaDetalles { get; set; } = new List<EtapaDetalle>();

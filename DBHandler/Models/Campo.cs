@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
 namespace DBHandler.Models
 {
@@ -23,11 +24,14 @@ namespace DBHandler.Models
         public bool Activo { get; set; } = true;
         [Required]
         public bool Requerido { get; set; } = true;
+        [ForeignKey("Flujo")]
+        public int? FlujoId { get; set; }
+        [JsonIgnore]
+        public virtual Flujo Flujo { get; set; } = null!;
         [ForeignKey("Etapa")]
         public int? EtapaId { get; set; }
+        [JsonIgnore]
         public virtual Etapa Etapa { get; set; } = null!;
-        [ForeignKey("EtapaDetalle")]
-        public int? EtapaDetalleId { get; set; }
-        public virtual EtapaDetalle EtapaDetalle { get; set; } = null!;
+
     }
 }
