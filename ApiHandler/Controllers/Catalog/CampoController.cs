@@ -109,7 +109,7 @@ namespace ApiHandler.Controllers.Catalog
             Campo campo = new Campo();
             campo.Nombre = campoRequest.nombre;
             campo.EtapaId = campoRequest.etapaId == 0 ? null : campoRequest.etapaId;
-            campo.EtapaDetalleId = campoRequest.subEtapaId == 0 ? null : campoRequest.subEtapaId;
+            campo.FlujoId = campoRequest.flujoId;
             campo.Tipo = campoRequest.tipoCampo;
             campo.Orden = campoRequest.orden;
             campo.Requerido = campoRequest.requerido;
@@ -174,8 +174,8 @@ namespace ApiHandler.Controllers.Catalog
                 return NotFound(response);
             }
             campo.Nombre = campoRequest.nombre;
-            campo.EtapaId = campoRequest.etapaId;
-            campo.EtapaDetalleId = campoRequest.subEtapaId;
+            campo.EtapaId = campoRequest.etapaId == 0 ? null : campoRequest.etapaId;
+            campo.FlujoId = campoRequest.flujoId;
             campo.Tipo = campoRequest.tipoCampo;
             campo.Orden = campoRequest.orden;
             campo.Requerido = campoRequest.requerido;

@@ -7,8 +7,8 @@ namespace ApiHandler.Models.Catalog
     {
         [Required]
         public string nombre { get; set; } = String.Empty;
-        public int etapaId { get; set; }
-        public int subEtapaId { get; set; }
+        public int? etapaId { get; set; }
+        public int flujoId { get; set; }
         [Required]
         [RegularExpression("^(Texto|Numero|Fecha)$", ErrorMessage = "Campo inválido")]
         public string tipoCampo { get; set; } = String.Empty;
@@ -26,7 +26,7 @@ namespace ApiHandler.Models.Catalog
         public string nombre { get; set; } = String.Empty;
 
         public int? etapaId { get; set; }
-        public int? subEtapaId { get; set; }
+        public int flujoId { get; set; }
         [Required]
         [RegularExpression("^(Texto|Numero|Fecha)$", ErrorMessage = "Campo inválido")]
         public string tipoCampo { get; set; } = String.Empty;
