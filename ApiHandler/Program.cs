@@ -47,6 +47,7 @@ builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<UsuarioService>();
 builder.Services.AddScoped<CampoLogic>();
 builder.Services.AddScoped<FileLogic>();
+builder.Services.AddScoped<CasesLogic>();
 builder.Services.AddScoped<CasesService>();
 builder.Services.AddScoped<ExpedienteService>();
 builder.Services.AddScoped<ExpedienteDetalleService>();

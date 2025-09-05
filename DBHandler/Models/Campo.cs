@@ -17,6 +17,14 @@ namespace DBHandler.Models
         [MaxLength(100)]
         public string Nombre { get; set; } = string.Empty;
         [Required]
+        [MaxLength(100)]
+        public string Label { get; set; } = string.Empty;
+        [Required]
+        [MaxLength(255)]
+        public string Placeholder { get; set; } = string.Empty;
+        [Column(TypeName = "CLOB")]
+        public string? Opciones { get; set; }
+        [Required]
         public int Orden { get; set; } = 0;
         [Required]
         public string Tipo { get; set; } = String.Empty;

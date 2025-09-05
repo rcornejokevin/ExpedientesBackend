@@ -23,18 +23,27 @@ namespace DBHandler.Models
         [Required]
         public DateTime FechaIngreso { get; set; } = DateTime.Now;
         public DateTime? FechaActualizacion { get; set; }
+
+        [Required]
+        public bool Activo { get; set; }
+        public string? Ubicacion { get; set; }
+        [Column(TypeName = "CLOB")]
+        public string? CampoValorJson { get; set; }
+        public string? NombreArchivo { get; set; }
+        public string? NombreArchivoHash { get; set; }
         [ForeignKey("Etapa")]
         [Required]
         public int EtapaId { get; set; }
-        [JsonIgnore]
-        public virtual Etapa Etapa { get; set; } = null!;
         [ForeignKey("EtapaDetalle")]
         public int? EtapaDetalleId { get; set; }
+        [ForeignKey("Usuario")]
+        public int AsesorId { get; set; }
+        [JsonIgnore]
+        public virtual Etapa Etapa { get; set; } = null!;
         [JsonIgnore]
         public virtual EtapaDetalle EtapaDetalle { get; set; } = null!;
-        [Required]
-        public bool Activo { get; set; }
-        [Required]
-        public string Ubicacion { get; set; } = String.Empty;
+        [JsonIgnore]
+        public virtual Usuario Usuario { get; set; } = null!;
+
     }
 }
