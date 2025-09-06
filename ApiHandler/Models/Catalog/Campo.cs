@@ -10,12 +10,17 @@ namespace ApiHandler.Models.Catalog
         public int? etapaId { get; set; }
         public int flujoId { get; set; }
         [Required]
-        [RegularExpression("^(Texto|Numero|Fecha)$", ErrorMessage = "Campo inválido")]
+        [RegularExpression("^(Texto|Numero|Fecha|Opciones|Cheque)$", ErrorMessage = "Campo inválido")]
         public string tipoCampo { get; set; } = String.Empty;
         [Required]
         public int orden { get; set; }
         [Required]
         public bool requerido { get; set; }
+        [Required]
+        public string label { get; set; } = String.Empty;
+        [Required]
+        public string placeHolder { get; set; } = String.Empty;
+        public string opciones { get; set; } = String.Empty;
     }
     public class EditCampoRequest
     {
@@ -28,11 +33,16 @@ namespace ApiHandler.Models.Catalog
         public int? etapaId { get; set; }
         public int flujoId { get; set; }
         [Required]
-        [RegularExpression("^(Texto|Numero|Fecha)$", ErrorMessage = "Campo inválido")]
+        [RegularExpression("^(Texto|Numero|Fecha|Opciones|Cheque)$", ErrorMessage = "Campo inválido")]
         public string tipoCampo { get; set; } = String.Empty;
         [Required]
         public int orden { get; set; }
         [Required]
         public bool requerido { get; set; }
+        [Required]
+        public string label { get; set; } = String.Empty;
+        [Required]
+        public string placeHolder { get; set; } = String.Empty;
+        public string opciones { get; set; } = String.Empty;
     }
 }
