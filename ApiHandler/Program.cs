@@ -2,10 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using DBHandler.Context;
 using Support.Items;
 using DBHandler.Service.Catalog;
+using DBHandler.Service.Cases;
 using DBHandler.Service.Security;
 using BusinessLogic.Services;
-using DBHandler.Models;
-using Microsoft.AspNetCore.Mvc;
 var builder = WebApplication.CreateBuilder(args);
 //Cors
 var localCors = "MyCors";
@@ -49,8 +48,7 @@ builder.Services.AddScoped<CampoLogic>();
 builder.Services.AddScoped<FileLogic>();
 builder.Services.AddScoped<CasesLogic>();
 builder.Services.AddScoped<CasesService>();
-builder.Services.AddScoped<ExpedienteService>();
-builder.Services.AddScoped<ExpedienteDetalleService>();
+builder.Services.AddScoped<CasesDetailService>();
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

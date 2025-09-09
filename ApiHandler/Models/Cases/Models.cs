@@ -19,4 +19,17 @@ namespace ApiHandler.Models.Cases
         public int asesor { get; set; }
         public string campos { get; set; } = String.Empty;
     }
+    public class EditCasesRequest
+    {
+
+        public int id { get; set; }
+        [Required]
+        public int etapaId { get; set; }
+        public int subEtapaId { get; set; }
+        public Boolean adjuntarArchivo { get; set; }
+        public string nombreArchivo { get; set; } = String.Empty;
+        public string archivo { get; set; } = String.Empty;
+        [Required]
+        public int asesor { get; set; }
+    }
 }
