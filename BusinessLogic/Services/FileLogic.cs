@@ -1,4 +1,5 @@
 using System.IO;
+using System.Diagnostics;
 
 namespace BusinessLogic.Services
 {
@@ -97,6 +98,230 @@ namespace BusinessLogic.Services
             {
                 // Silencio: la miniatura es opcional. No romper el flujo de guardado.
             }
+        }
+
+        // Anexa un PDF (en base64) al final de un PDF existente, sobreescribiendo el archivo destino.
+        public async Task AppendPdfBase64Async(string base64Content, string targetPdfPath)
+        {
+            if (string.IsNullOrWhiteSpace(base64Content)) throw new ArgumentException("Contenido base64 vacío", nameof(base64Content));
+            if (string.IsNullOrWhiteSpace(targetPdfPath)) throw new ArgumentException("Ruta de archivo destino inválida", nameof(targetPdfPath));
+            if (!File.Exists(targetPdfPath)) throw new FileNotFoundException("PDF base no encontrado", targetPdfPath);
+
+            var dir = Path.GetDirectoryName(targetPdfPath)!;
+            Directory.CreateDirectory(dir);
+
+            // Normaliza base64
+            var commaIndex = base64Content.IndexOf(',');
+            if (base64Content.StartsWith("data:") && commaIndex > 0)
+            {
+                base64Content = base64Content[(commaIndex + 1)..];
+            }
+
+            byte[] newPdfBytes;
+            try
+            {
+                newPdfBytes = Convert.FromBase64String(base64Content);
+            }
+            catch (FormatException)
+            {
+                throw new ArgumentException("El contenido no es un base64 válido", nameof(base64Content));
+            }
+
+            // Escribe la parte nueva a un archivo temporal
+            var tempNew = Path.Combine(dir, $"append_{Guid.NewGuid():N}.pdf");
+            var tempOut = Path.Combine(dir, $"merged_{Guid.NewGuid():N}.pdf");
+            await File.WriteAllBytesAsync(tempNew, newPdfBytes);
+
+            try
+            {
+                // Intenta diferentes estrategias de concatenación
+                if (!TryConcatWithGhostscript(targetPdfPath, tempNew, tempOut))
+                {
+                    if (!TryConcatWithPdfUnite(targetPdfPath, tempNew, tempOut))
+                    {
+                        if (!TryConcatWithQpdf(targetPdfPath, tempNew, tempOut))
+                        {
+                            throw new InvalidOperationException("No se pudo concatenar PDFs: no hay herramienta disponible (gs/pdfunite/qpdf)");
+                        }
+                    }
+                }
+
+                // Reemplaza el archivo original por el combinado
+                var backup = targetPdfPath + ".bak";
+                if (File.Exists(backup)) File.Delete(backup);
+                File.Move(targetPdfPath, backup);
+                File.Move(tempOut, targetPdfPath);
+                File.Delete(backup);
+            }
+            finally
+            {
+                // Limpieza de temporales
+                try { if (File.Exists(tempNew)) File.Delete(tempNew); } catch { }
+                try { if (File.Exists(tempOut)) File.Delete(tempOut); } catch { }
+            }
+        }
+
+        // Anexa un PDF (base64) al final de un PDF base, generando un NUEVO archivo de salida y preservando el original.
+        // Devuelve el path final de salida.
+        public async Task<string> AppendPdfBase64ToNewFileAsync(string base64Content, string basePdfPath, string outPdfPath)
+        {
+            if (string.IsNullOrWhiteSpace(base64Content)) throw new ArgumentException("Contenido base64 vacío", nameof(base64Content));
+            if (string.IsNullOrWhiteSpace(basePdfPath)) throw new ArgumentException("Ruta de PDF base inválida", nameof(basePdfPath));
+            if (!File.Exists(basePdfPath)) throw new FileNotFoundException("PDF base no encontrado", basePdfPath);
+
+            var dir = Path.GetDirectoryName(basePdfPath)!;
+            Directory.CreateDirectory(dir);
+
+            // Normaliza base64
+            var commaIndex = base64Content.IndexOf(',');
+            if (base64Content.StartsWith("data:") && commaIndex > 0)
+            {
+                base64Content = base64Content[(commaIndex + 1)..];
+            }
+
+            byte[] newPdfBytes;
+            try
+            {
+                newPdfBytes = Convert.FromBase64String(base64Content);
+            }
+            catch (FormatException)
+            {
+                throw new ArgumentException("El contenido no es un base64 válido", nameof(base64Content));
+            }
+
+            // Asegura nombre único si el de salida existe
+            var outputDir = Path.GetDirectoryName(outPdfPath)!;
+            Directory.CreateDirectory(outputDir);
+            var outputName = Path.GetFileName(outPdfPath);
+            var outBase = Path.GetFileNameWithoutExtension(outputName);
+            var outExt = Path.GetExtension(outputName);
+            var candidateOut = outPdfPath;
+            int counter = 1;
+            while (File.Exists(candidateOut))
+            {
+                candidateOut = Path.Combine(outputDir, $"{outBase}_{counter}{outExt}");
+                counter++;
+            }
+
+            // Escribe la parte nueva a un archivo temporal y concatena
+            var tempNew = Path.Combine(outputDir, $"append_{Guid.NewGuid():N}.pdf");
+            var tempOut = Path.Combine(outputDir, $"merged_{Guid.NewGuid():N}.pdf");
+            await File.WriteAllBytesAsync(tempNew, newPdfBytes);
+
+            try
+            {
+                if (!TryConcatWithGhostscript(basePdfPath, tempNew, tempOut))
+                {
+                    if (!TryConcatWithPdfUnite(basePdfPath, tempNew, tempOut))
+                    {
+                        if (!TryConcatWithQpdf(basePdfPath, tempNew, tempOut))
+                        {
+                            throw new InvalidOperationException("No se pudo concatenar PDFs: no hay herramienta disponible (gs/pdfunite/qpdf)");
+                        }
+                    }
+                }
+
+                // Mueve el resultado al archivo definitivo (sin tocar el original)
+                File.Move(tempOut, candidateOut);
+
+                // Genera miniatura como en guardado normal
+                try
+                {
+                    var baseName = Path.GetFileNameWithoutExtension(candidateOut);
+                    var ext = (Path.GetExtension(candidateOut) ?? string.Empty).ToLowerInvariant();
+                    if (ext == ".pdf")
+                    {
+                        if (!TryGeneratePdfThumbWithPdftoppm(candidateOut, outputDir, baseName))
+                        {
+                            TryGeneratePdfThumbWithGhostscript(candidateOut, outputDir, baseName);
+                        }
+                    }
+                }
+                catch { }
+
+                return candidateOut;
+            }
+            finally
+            {
+                try { if (File.Exists(tempNew)) File.Delete(tempNew); } catch { }
+                try { if (File.Exists(tempOut)) File.Delete(tempOut); } catch { }
+            }
+        }
+
+        private static bool TryConcatWithGhostscript(string basePdf, string appendPdf, string outPdf)
+        {
+            try
+            {
+                var p = new Process();
+                p.StartInfo.FileName = "gs";
+                p.StartInfo.ArgumentList.Add("-dBATCH");
+                p.StartInfo.ArgumentList.Add("-dNOPAUSE");
+                p.StartInfo.ArgumentList.Add("-q");
+                p.StartInfo.ArgumentList.Add("-sDEVICE=pdfwrite");
+                p.StartInfo.ArgumentList.Add("-sOutputFile=" + outPdf);
+                p.StartInfo.ArgumentList.Add(basePdf);
+                p.StartInfo.ArgumentList.Add(appendPdf);
+                p.StartInfo.UseShellExecute = false;
+                p.StartInfo.RedirectStandardError = true;
+                p.StartInfo.RedirectStandardOutput = true;
+                p.Start();
+                if (!p.WaitForExit(20000))
+                {
+                    try { p.Kill(entireProcessTree: true); } catch { }
+                    return false;
+                }
+                return File.Exists(outPdf);
+            }
+            catch { return false; }
+        }
+
+        private static bool TryConcatWithPdfUnite(string basePdf, string appendPdf, string outPdf)
+        {
+            try
+            {
+                var p = new Process();
+                p.StartInfo.FileName = "pdfunite";
+                p.StartInfo.ArgumentList.Add(basePdf);
+                p.StartInfo.ArgumentList.Add(appendPdf);
+                p.StartInfo.ArgumentList.Add(outPdf);
+                p.StartInfo.UseShellExecute = false;
+                p.StartInfo.RedirectStandardError = true;
+                p.StartInfo.RedirectStandardOutput = true;
+                p.Start();
+                if (!p.WaitForExit(20000))
+                {
+                    try { p.Kill(entireProcessTree: true); } catch { }
+                    return false;
+                }
+                return File.Exists(outPdf);
+            }
+            catch { return false; }
+        }
+
+        private static bool TryConcatWithQpdf(string basePdf, string appendPdf, string outPdf)
+        {
+            try
+            {
+                var p = new Process();
+                p.StartInfo.FileName = "qpdf";
+                p.StartInfo.ArgumentList.Add("--empty");
+                p.StartInfo.ArgumentList.Add("--pages");
+                p.StartInfo.ArgumentList.Add(basePdf);
+                p.StartInfo.ArgumentList.Add(appendPdf);
+                p.StartInfo.ArgumentList.Add("--");
+                p.StartInfo.ArgumentList.Add(outPdf);
+                p.StartInfo.UseShellExecute = false;
+                p.StartInfo.RedirectStandardError = true;
+                p.StartInfo.RedirectStandardOutput = true;
+                p.Start();
+                if (!p.WaitForExit(20000))
+                {
+                    try { p.Kill(entireProcessTree: true); } catch { }
+                    return false;
+                }
+                return File.Exists(outPdf);
+            }
+            catch { return false; }
         }
 
         private static bool TryGeneratePdfThumbWithPdftoppm(string pdfPath, string outputDir, string baseName)

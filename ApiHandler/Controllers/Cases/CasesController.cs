@@ -7,6 +7,7 @@ using DBHandler.Models;
 using DBHandler.Service.Catalog;
 using ApiHandler.Utils;
 using BusinessLogic.Models;
+using DBHandler.Service.Cases;
 namespace ApiHandler.Controllers.Catalog
 {
     [Route("cases")]
@@ -16,11 +17,13 @@ namespace ApiHandler.Controllers.Catalog
         public Jwt jwt;
         public CasesLogic casesLogic;
         public CasesService casesService;
-        public CasesController(Jwt jwt, CasesLogic casesLogic, CasesService CasesService)
+        public CasesDetailService casesDetailService;
+        public CasesController(Jwt jwt, CasesLogic casesLogic, CasesService CasesService, CasesDetailService casesDetailService)
         {
             this.jwt = jwt;
             this.casesLogic = casesLogic;
             this.casesService = CasesService;
+            this.casesDetailService = casesDetailService;
         }
         [HttpPost("add")]
         public async Task<IActionResult> addElement([FromHeader] string Authorization, [FromBody] NewCasesRequest casesRequest)
@@ -231,6 +234,72 @@ namespace ApiHandler.Controllers.Catalog
             }
             return Ok(response);
         }
-
+        [HttpGet("detail/{id}")]
+        public async Task<IActionResult> getDetail([FromHeader] string Authorization, int id)
+        {
+            if (!jwt.ValidateJwtToken(Authorization))
+            {
+                return Unauthorized();
+            }
+            ResponseApi response = new ResponseApi();
+            response.code = "000";
+            response.message = "Lista de Expediente Detalle";
+            try
+            {
+                List<ExpedienteDetalle> expedienteDetalle = await casesDetailService.GetAllByExpedienteIdAsync(id);
+                response.data = expedienteDetalle
+                    .OrderBy(d => d.Fecha)
+                    .Select(d => new
+                    {
+                        d.Id,
+                        d.Fecha,
+                        d.Ubicacion,
+                        d.NombreArchivo,
+                        d.NombreArchivoHash,
+                        d.EtapaAnteriorId,
+                        d.EtapaDetalleAnteriorId,
+                        d.EtapaNuevaId,
+                        d.EtapaDetalleNuevaId,
+                        d.AsesorAnteriorId,
+                        d.AsesorNuevorId,
+                        etapa = d.EtapaNueva.Nombre,
+                        subEtapa = d.EtapaDetalleNuevaId != null ? d.EtapaDetalleNueva?.Nombre : "",
+                        miniatura = ThumbnailHelper.TryGetThumbnailBase64(d.Ubicacion ?? string.Empty, d.NombreArchivoHash ?? string.Empty)
+                    })
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                response.code = "500";
+                response.message = ex.Message;
+                response.data = ex.StackTrace;
+                return StatusCode(500, response);
+            }
+            return Ok(response);
+        }
+        [HttpGet("detail_file/{id}")]
+        public async Task<IActionResult> getDetailFile([FromHeader] string Authorization, int id)
+        {
+            if (!jwt.ValidateJwtToken(Authorization))
+            {
+                return Unauthorized();
+            }
+            ResponseApi response = new ResponseApi();
+            response.code = "000";
+            response.message = "Expediente Detalle";
+            try
+            {
+                ExpedienteDetalle? expedienteDetalle = await casesDetailService.GetByIdAsync(id);
+                response.data = expedienteDetalle;
+            }
+            catch (Exception ex)
+            {
+                response.code = "500";
+                response.message = ex.Message;
+                response.data = ex.StackTrace;
+                return StatusCode(500, response);
+            }
+            return Ok(response);
+        }
     }
 }

@@ -1,12 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using DBHandler.Context;
 using DBHandler.Models;
-namespace DBHandler.Service.Catalog
+namespace DBHandler.Service.Cases
 {
-    public class ExpedienteDetalleService
+    public class CasesDetailService
     {
         private readonly DBHandlerContext context;
-        public ExpedienteDetalleService(DBHandlerContext context)
+        public CasesDetailService(DBHandlerContext context)
         {
             this.context = context;
         }
@@ -33,6 +33,12 @@ namespace DBHandler.Service.Catalog
         {
             return await context.ExpedienteDetalles
                 .Where(u => u.ExpedienteId == expediente.Id)
+                .ToListAsync();
+        }
+        public async Task<List<ExpedienteDetalle>> GetAllByExpedienteIdAsync(int expedienteId)
+        {
+            return await context.ExpedienteDetalles
+                .Where(u => u.ExpedienteId == expedienteId)
                 .ToListAsync();
         }
         public async Task<List<ExpedienteDetalle>> GetAllAsync()

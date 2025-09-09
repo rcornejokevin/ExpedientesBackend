@@ -19,6 +19,7 @@ namespace DBHandler.Service.Catalog
         {
             return await _context.Expedientes
                 .Where(u => u.Activo)
+                .Include(e => e.Etapa)
                 .ToListAsync();
         }
         public async Task<Expediente?> GetByIdAsync(int id)
@@ -26,11 +27,18 @@ namespace DBHandler.Service.Catalog
             return await _context.Expedientes
                 .Where(u => u.Id == id)
                 .Where(u => u.Activo)
+                .Include(e => e.Etapa)
                 .FirstOrDefaultAsync();
         }
         public async Task<Expediente> AddAsync(Expediente expediente)
         {
             _context.Expedientes.Add(expediente);
+            await _context.SaveChangesAsync();
+            return expediente;
+        }
+        public async Task<Expediente> EditAsync(Expediente expediente)
+        {
+            _context.Expedientes.Update(expediente);
             await _context.SaveChangesAsync();
             return expediente;
         }

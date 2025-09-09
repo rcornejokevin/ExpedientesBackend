@@ -11,12 +11,42 @@ namespace DBHandler.Models
         public int Id { get; set; }
         [Required]
         public DateTime Fecha { get; set; } = DateTime.Now;
+        public string? Ubicacion { get; set; }
+        public string? NombreArchivo { get; set; }
+        public string? NombreArchivoHash { get; set; }
+        [ForeignKey("Etapa")]
+        public int? EtapaAnteriorId { get; set; }
+        [ForeignKey("EtapaDetalle")]
+        public int? EtapaDetalleAnteriorId { get; set; }
+        [ForeignKey("Etapa")]
+        [Required]
+        public int EtapaNuevaId { get; set; }
+        [ForeignKey("EtapaDetalle")]
+        public int? EtapaDetalleNuevaId { get; set; }
+        [ForeignKey("Usuario")]
+        public int? AsesorAnteriorId { get; set; }
+        [Required]
+        [ForeignKey("Usuario")]
+        public int AsesorNuevorId { get; set; }
         [ForeignKey("Expediente")]
         [Required]
         public int ExpedienteId { get; set; }
-        [Required]
-        public string Responsable { get; set; } = String.Empty;
         [JsonIgnore]
         public virtual Expediente Expediente { get; set; } = null!;
+        [ForeignKey(nameof(EtapaAnteriorId))]
+        [JsonIgnore]
+        public virtual Etapa? EtapaAnterior { get; set; }
+
+        [ForeignKey(nameof(EtapaNuevaId))]
+        [JsonIgnore]
+        public virtual Etapa EtapaNueva { get; set; } = null!;
+
+        [ForeignKey(nameof(EtapaDetalleAnteriorId))]
+        [JsonIgnore]
+        public virtual EtapaDetalle? EtapaDetalleAnterior { get; set; }
+
+        [ForeignKey(nameof(EtapaDetalleNuevaId))]
+        [JsonIgnore]
+        public virtual EtapaDetalle? EtapaDetalleNueva { get; set; }
     }
 }

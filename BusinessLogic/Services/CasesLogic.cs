@@ -112,16 +112,41 @@ namespace BusinessLogic.Services
             await checkCases(expediente, followCaseVar);
             if (!string.IsNullOrWhiteSpace(followCaseVar.nombreArchivo) && !string.IsNullOrWhiteSpace(followCaseVar.archivo))
             {
-                expediente.NombreArchivo = followCaseVar.nombreArchivo;
-                var hash = HashNombre(followCaseVar.nombreArchivo);
-                var extension = Path.GetExtension(followCaseVar.nombreArchivo);
-                expediente.NombreArchivoHash = string.IsNullOrWhiteSpace(extension)
-                    ? hash
-                    : $"{hash}{extension}";
-
-                if (!followCaseVar.adjuntarArchivo) await fileLogic.SaveBase64Async(followCaseVar.archivo, uploadDir, expediente.NombreArchivoHash);
 
                 expediente.Ubicacion = uploadDir;
+                if (!followCaseVar.adjuntarArchivo)
+                {
+                    expediente.NombreArchivo = followCaseVar.nombreArchivo;
+                    var hash = HashNombre(followCaseVar.nombreArchivo);
+                    var extension = Path.GetExtension(followCaseVar.nombreArchivo);
+                    expediente.NombreArchivoHash = string.IsNullOrWhiteSpace(extension)
+                        ? hash
+                        : $"{hash}{extension}";
+                    await fileLogic.SaveBase64Async(followCaseVar.archivo, uploadDir, expediente.NombreArchivoHash);
+
+                }
+                else
+                {
+                    var currentDir = string.IsNullOrWhiteSpace(expediente.Ubicacion) ? uploadDir : expediente.Ubicacion;
+                    var currentName = expediente.NombreArchivoHash;
+                    if (string.IsNullOrWhiteSpace(currentDir) || string.IsNullOrWhiteSpace(currentName))
+                    {
+                        throw new ArgumentException("No existe documento base para adjuntar.");
+                    }
+                    var targetPath = Path.Combine(currentDir, currentName);
+
+                    // Genera un nuevo nombre de archivo (hash + extensión) y conserva el original en carpeta
+                    var extension = Path.GetExtension(expediente.NombreArchivo);
+                    var newHash = HashNombre(expediente.NombreArchivo);
+                    var newFileName = string.IsNullOrWhiteSpace(extension) ? newHash : $"{newHash}{extension}";
+                    var outPath = Path.Combine(currentDir, newFileName);
+
+                    await fileLogic.AppendPdfBase64ToNewFileAsync(followCaseVar.archivo, targetPath, outPath);
+
+                    // Actualiza el expediente para apuntar al nuevo archivo combinado
+                    expediente.NombreArchivoHash = newFileName;
+                    expediente.Ubicacion = currentDir;
+                }
             }
             //expediente.AsesorId = followCaseVar.asesor;
             expediente.EtapaId = followCaseVar.etapaId;
