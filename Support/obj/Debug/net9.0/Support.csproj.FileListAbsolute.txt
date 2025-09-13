@@ -6,6 +6,7 @@
 /Users/kennycornejoguzman/workdir/GestionExpedientesBackend/Support/obj/Debug/net9.0/Support.AssemblyInfoInputs.cache
 /Users/kennycornejoguzman/workdir/GestionExpedientesBackend/Support/obj/Debug/net9.0/Support.AssemblyInfo.cs
 /Users/kennycornejoguzman/workdir/GestionExpedientesBackend/Support/obj/Debug/net9.0/Support.csproj.CoreCompileInputs.cache
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/Support/obj/Debug/net9.0/Support.sourcelink.json
 /Users/kennycornejoguzman/workdir/GestionExpedientesBackend/Support/obj/Debug/net9.0/Support.dll
 /Users/kennycornejoguzman/workdir/GestionExpedientesBackend/Support/obj/Debug/net9.0/refint/Support.dll
 /Users/kennycornejoguzman/workdir/GestionExpedientesBackend/Support/obj/Debug/net9.0/Support.pdb

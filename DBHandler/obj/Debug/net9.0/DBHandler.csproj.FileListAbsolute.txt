@@ -7,6 +7,7 @@
 /Users/kennycornejoguzman/workdir/GestionExpedientesBackend/DBHandler/obj/Debug/net9.0/DBHandler.AssemblyInfoInputs.cache
 /Users/kennycornejoguzman/workdir/GestionExpedientesBackend/DBHandler/obj/Debug/net9.0/DBHandler.AssemblyInfo.cs
 /Users/kennycornejoguzman/workdir/GestionExpedientesBackend/DBHandler/obj/Debug/net9.0/DBHandler.csproj.CoreCompileInputs.cache
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/DBHandler/obj/Debug/net9.0/DBHandler.sourcelink.json
 /Users/kennycornejoguzman/workdir/GestionExpedientesBackend/DBHandler/obj/Debug/net9.0/DBHandler.dll
 /Users/kennycornejoguzman/workdir/GestionExpedientesBackend/DBHandler/obj/Debug/net9.0/refint/DBHandler.dll
 /Users/kennycornejoguzman/workdir/GestionExpedientesBackend/DBHandler/obj/Debug/net9.0/DBHandler.pdb

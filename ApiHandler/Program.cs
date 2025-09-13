@@ -5,6 +5,7 @@ using DBHandler.Service.Catalog;
 using DBHandler.Service.Cases;
 using DBHandler.Service.Security;
 using BusinessLogic.Services;
+using DBHandler.Models;
 var builder = WebApplication.CreateBuilder(args);
 //Cors
 var localCors = "MyCors";
@@ -44,6 +45,7 @@ builder.Services.AddScoped<EtapaService>();
 builder.Services.AddScoped<EtapaDetalleService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<UsuarioService>();
+builder.Services.AddScoped<RemitenteService>();
 builder.Services.AddScoped<CampoLogic>();
 builder.Services.AddScoped<FileLogic>();
 builder.Services.AddScoped<CasesLogic>();

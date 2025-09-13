@@ -58,6 +58,7 @@
 /Users/kennycornejoguzman/workdir/GestionExpedientesBackend/ApiHandler/obj/Debug/net9.0/ApiHandler.csproj.CoreCompileInputs.cache
 /Users/kennycornejoguzman/workdir/GestionExpedientesBackend/ApiHandler/obj/Debug/net9.0/ApiHandler.MvcApplicationPartsAssemblyInfo.cs
 /Users/kennycornejoguzman/workdir/GestionExpedientesBackend/ApiHandler/obj/Debug/net9.0/ApiHandler.MvcApplicationPartsAssemblyInfo.cache
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/ApiHandler/obj/Debug/net9.0/ApiHandler.sourcelink.json
 /Users/kennycornejoguzman/workdir/GestionExpedientesBackend/ApiHandler/obj/Debug/net9.0/scopedcss/bundle/ApiHandler.styles.css
 /Users/kennycornejoguzman/workdir/GestionExpedientesBackend/ApiHandler/obj/Debug/net9.0/staticwebassets.build.json
 /Users/kennycornejoguzman/workdir/GestionExpedientesBackend/ApiHandler/obj/Debug/net9.0/staticwebassets.build.json.cache

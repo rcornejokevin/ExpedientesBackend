@@ -19,6 +19,8 @@ namespace DBHandler.Models
         [Required]
         public string Nombre { get; set; } = String.Empty;
         [Required]
+        public string Asunto { get; set; } = String.Empty;
+        [Required]
         public string Estatus { get; set; } = String.Empty;
         [Required]
         public DateTime FechaIngreso { get; set; } = DateTime.Now;
@@ -38,12 +40,16 @@ namespace DBHandler.Models
         public int? EtapaDetalleId { get; set; }
         [ForeignKey("Usuario")]
         public int AsesorId { get; set; }
+        [ForeignKey("Remitente")]
+        public int RemitenteId { get; set; }
         [JsonIgnore]
         public virtual Etapa Etapa { get; set; } = null!;
         [JsonIgnore]
         public virtual EtapaDetalle EtapaDetalle { get; set; } = null!;
         [JsonIgnore]
         public virtual Usuario Usuario { get; set; } = null!;
+        [JsonIgnore]
+        public virtual Remitente Remitente { get; set; } = null!;
 
     }
 }

@@ -16,6 +16,7 @@ namespace DBHandler.Context
         public DbSet<Campo> Campos { get; set; }
         public DbSet<Expediente> Expedientes { get; set; }
         public DbSet<ExpedienteDetalle> ExpedienteDetalles { get; set; }
+        public DbSet<Remitente> Remitentes { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             //Tables
@@ -26,6 +27,7 @@ namespace DBHandler.Context
             modelBuilder.Entity<Campo>().ToTable("CAMPOS");
             modelBuilder.Entity<Expediente>().ToTable("EXPEDIENTES");
             modelBuilder.Entity<ExpedienteDetalle>().ToTable("EXPEDIENTE_DETALLES");
+            modelBuilder.Entity<Remitente>().ToTable("REMITENTE");
             base.OnModelCreating(modelBuilder);
         }
     }

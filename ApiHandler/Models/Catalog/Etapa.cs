@@ -4,38 +4,43 @@ namespace ApiHandler.Models.Catalog
 {
     public class NewEtapaRequest
     {
-        [Required]
+        [Required(ErrorMessage = "El nombre es requerido")]
         public string nombre { get; set; } = String.Empty;
-        [Required]
+        [Required(ErrorMessage = "El orden es requerido")]
         public int orden { get; set; }
         public string detalle { get; set; } = String.Empty;
-        [Required]
+        [Required(ErrorMessage = "El flujo es requerido")]
         public int flujoId { get; set; }
+        [Required(ErrorMessage = "Fin de flujo es requerido")]
+        public bool finDeFlujo { get; set; }
     }
     public class EditEtapaRequest
     {
-        [Required]
+        [Required(ErrorMessage = "El id es requerido")]
+        [Range(1, int.MaxValue, ErrorMessage = "El valor de id es requerido")]
         public int id { get; set; }
-        [Required]
+        [Required(ErrorMessage = "El nombre es requerido")]
         public string nombre { get; set; } = String.Empty;
-        [Required]
+        [Required(ErrorMessage = "El orden es requerido")]
         public int orden { get; set; }
         public string detalle { get; set; } = String.Empty;
-        [Required]
+        [Required(ErrorMessage = "El flujo es requerido")]
         public int flujoId { get; set; }
+        [Required(ErrorMessage = "Fin de flujo es requerido")]
+        public bool finDeFlujo { get; set; }
     }
     public class OrdenDetail
     {
-        [Required]
+        [Required(ErrorMessage = "Se debe enviar el id a ordenar")]
         public int id { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Se debe enviar el campo orden")]
         public int orden { get; set; }
     }
 
     public class EditOrdenEtapaRequest
     {
-        [Required]
+        [Required(ErrorMessage = "Se debe enviar el listado")]
         [MinLength(1, ErrorMessage = "Debe enviar al menos un item.")]
         public List<OrdenDetail> items { get; set; } = new();
     }

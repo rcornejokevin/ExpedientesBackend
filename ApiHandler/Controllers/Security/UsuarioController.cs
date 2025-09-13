@@ -20,11 +20,13 @@ namespace ApiHandler.Controllers.Security
         [HttpGet("list")]
         public async Task<IActionResult> List([FromHeader] string Authorization)
         {
+            ResponseApi response = new ResponseApi();
             if (!jwt.ValidateJwtToken(Authorization))
             {
-                return Unauthorized();
+                response.code = "401";
+                response.message = "Unauthorized";
+                return Ok(response);
             }
-            ResponseApi response = new ResponseApi();
             response.code = "000";
             response.message = "Listado de usuarios";
             try
@@ -36,7 +38,7 @@ namespace ApiHandler.Controllers.Security
                 response.code = "500";
                 response.message = ex.Message;
                 response.data = ex.StackTrace;
-                return StatusCode(500, response);
+                return Ok(response);
             }
             return Ok(response);
         }
@@ -44,11 +46,24 @@ namespace ApiHandler.Controllers.Security
         public async Task<IActionResult> Add([FromHeader] string Authorization, [FromBody] NewUsuarioRequest userRequest)
         {
 
+            ResponseApi response = new ResponseApi();
             if (!jwt.ValidateJwtToken(Authorization))
             {
-                return Unauthorized();
+                response.code = "401";
+                response.message = "Unauthorized";
+                return Ok(response);
             }
-            ResponseApi response = new ResponseApi();
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => string.IsNullOrWhiteSpace(e.ErrorMessage) ? e.Exception?.Message ?? "Solicitud inválida" : e.ErrorMessage)
+                    .ToList();
+                response.code = "400";
+                response.message = errors.FirstOrDefault() ?? "Solicitud inválida";
+                response.data = errors;
+                return Ok(response);
+            }
             response.code = "000";
             response.message = "Usuario creado correctamente";
             try
@@ -61,18 +76,31 @@ namespace ApiHandler.Controllers.Security
                 response.code = "500";
                 response.message = ex.Message;
                 response.data = ex.StackTrace;
-                return StatusCode(500, response);
+                return Ok(response);
             }
             return Ok(response);
         }
         [HttpPut("edit")]
         public async Task<IActionResult> Edit([FromHeader] string Authorization, [FromBody] EditUsuarioRequest userRequest)
         {
+            ResponseApi response = new ResponseApi();
             if (!jwt.ValidateJwtToken(Authorization))
             {
-                return Unauthorized();
+                response.code = "401";
+                response.message = "Unauthorized";
+                return Ok(response);
             }
-            ResponseApi response = new ResponseApi();
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => string.IsNullOrWhiteSpace(e.ErrorMessage) ? e.Exception?.Message ?? "Solicitud inválida" : e.ErrorMessage)
+                    .ToList();
+                response.code = "400";
+                response.message = errors.FirstOrDefault() ?? "Solicitud inválida";
+                response.data = errors;
+                return Ok(response);
+            }
             response.code = "000";
             response.message = "Edición de usuario";
             try
@@ -82,7 +110,7 @@ namespace ApiHandler.Controllers.Security
                 {
                     response.code = "404";
                     response.message = "Usuario no encontrado";
-                    return NotFound(response);
+                    return Ok(response);
                 }
                 user.Username = userRequest.username ?? "";
                 user.Perfil = userRequest.perfil ?? "";
@@ -95,7 +123,7 @@ namespace ApiHandler.Controllers.Security
                     response.code = "500";
                     response.message = ex.Message;
                     response.data = ex.StackTrace;
-                    return StatusCode(500, response);
+                    return Ok(response);
                 }
             }
             catch (Exception ex)
@@ -103,18 +131,20 @@ namespace ApiHandler.Controllers.Security
                 response.code = "500";
                 response.message = ex.Message;
                 response.data = ex.StackTrace;
-                return StatusCode(500, response);
+                return Ok(response);
             }
             return Ok(response);
         }
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromHeader] string Authorization, int id)
         {
+            ResponseApi response = new ResponseApi();
             if (!jwt.ValidateJwtToken(Authorization))
             {
-                return Unauthorized();
+                response.code = "401";
+                response.message = "Unauthorized";
+                return Ok(response);
             }
-            ResponseApi response = new ResponseApi();
             response.code = "000";
             response.message = "Usuario eliminado correctamente";
 
@@ -125,7 +155,7 @@ namespace ApiHandler.Controllers.Security
                 {
                     response.code = "404";
                     response.message = "Usuario no encontrado";
-                    return NotFound(response);
+                    return Ok(response);
                 }
                 usuario.Activo = false;
                 await usuarioService.updateAsync(usuario);
@@ -135,18 +165,20 @@ namespace ApiHandler.Controllers.Security
                 response.code = "500";
                 response.message = ex.Message;
                 response.data = ex.StackTrace;
-                return StatusCode(500, response);
+                return Ok(response);
             }
             return Ok(response);
         }
         [HttpGet("{id}")]
         public async Task<IActionResult> GetElement([FromHeader] string Authorization, int id)
         {
+            ResponseApi response = new ResponseApi();
             if (!jwt.ValidateJwtToken(Authorization))
             {
-                return Unauthorized();
+                response.code = "401";
+                response.message = "Unauthorized";
+                return Ok(response);
             }
-            ResponseApi response = new ResponseApi();
             response.code = "000";
             response.message = "Detalle de usuario";
             try
@@ -156,7 +188,7 @@ namespace ApiHandler.Controllers.Security
                 {
                     response.code = "404";
                     response.message = "Usuario no encontrado";
-                    return NotFound(response);
+                    return Ok(response);
                 }
                 response.data = usuario;
             }
@@ -165,7 +197,7 @@ namespace ApiHandler.Controllers.Security
                 response.code = "500";
                 response.message = ex.Message;
                 response.data = ex.StackTrace;
-                return StatusCode(500, response);
+                return Ok(response);
             }
             return Ok(response);
         }

@@ -13,6 +13,8 @@ namespace DBHandler.Models
         public DateTime Fecha { get; set; } = DateTime.Now;
         public string? Ubicacion { get; set; }
         public string? NombreArchivo { get; set; }
+        public string? EstatusAnterior { get; set; } = String.Empty;
+        public string? EstatusNuevo { get; set; } = String.Empty;
         public string? NombreArchivoHash { get; set; }
         [ForeignKey("Etapa")]
         public int? EtapaAnteriorId { get; set; }

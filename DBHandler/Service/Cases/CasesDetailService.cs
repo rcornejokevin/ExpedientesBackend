@@ -22,6 +22,13 @@ namespace DBHandler.Service.Cases
             await context.SaveChangesAsync();
             return expedienteDetalle;
         }
+        public async Task<int> CountByExpedienteIdAsync(int expedienteId)
+        {
+            return await context.ExpedienteDetalles
+                .Where(u => u.ExpedienteId == expedienteId)
+                .Where(u => u.Ubicacion != null && u.Ubicacion != "")
+                .CountAsync();
+        }
 
         public async Task<ExpedienteDetalle?> GetByIdAsync(int id)
         {
@@ -44,6 +51,15 @@ namespace DBHandler.Service.Cases
         public async Task<List<ExpedienteDetalle>> GetAllAsync()
         {
             return await context.ExpedienteDetalles
+                .ToListAsync();
+        }
+
+        public async Task<List<ExpedienteDetalle>> GetAllByDateRangeWithEtapaAsync(DateTime startInclusive, DateTime endExclusive)
+        {
+            return await context.ExpedienteDetalles
+                .Where(d => d.Fecha >= startInclusive && d.Fecha < endExclusive)
+                .Include(d => d.EtapaNueva)
+                .ThenInclude(e => e.Flujo)
                 .ToListAsync();
         }
     }

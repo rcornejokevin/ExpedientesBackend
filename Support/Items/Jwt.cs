@@ -46,13 +46,6 @@ public class Jwt
             AutoRefreshInSeconds = (int)(minutesLiveToken * 60) - 60
         };
     }
-    /*************  ✨ Windsurf Command ⭐  *************/
-    /// <summary>
-    /// Validates the JWT token against the secret key in the config.
-    /// </summary>
-    /// <param name="token">The JWT token to validate.</param>
-    /// <returns>true if the token is valid, false otherwise.</returns>
-    /*******  9ceb5829-ee34-4ebe-8f3c-3a6f156530a9  *******/
     public bool ValidateJwtToken(string token)
     {
         try
@@ -78,6 +71,49 @@ public class Jwt
         {
             return false;
         }
+    }
+
+    // Returns ClaimsPrincipal if valid; otherwise null
+    public ClaimsPrincipal? GetPrincipalFromToken(string token, bool validateLifetime = true)
+    {
+        try
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = validateLifetime,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = "GestionExpedientesAPI",
+                ValidAudience = "GestionExpedientesCliente",
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+                    configuration["JwtSettings:SecretKey"] ?? ""
+                ))
+            };
+            var cleanToken = token.Replace("Bearer ", "", StringComparison.OrdinalIgnoreCase).Trim();
+            var principal = tokenHandler.ValidateToken(cleanToken, validationParameters, out SecurityToken _);
+            return principal;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    // Convenience: obtain username (sub claim) from Authorization header
+    public string? GetUsernameFromAuthorization(string authorization)
+    {
+        var principal = GetPrincipalFromToken(authorization);
+        if (principal == null) return null;
+
+        // Prefer the 'sub' claim used at token generation
+        var sub = principal.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
+        if (!string.IsNullOrWhiteSpace(sub)) return sub;
+
+        // Fallbacks if mapping differs
+        return principal.FindFirst(ClaimTypes.NameIdentifier)?.Value
+               ?? principal.Identity?.Name;
     }
 }
 

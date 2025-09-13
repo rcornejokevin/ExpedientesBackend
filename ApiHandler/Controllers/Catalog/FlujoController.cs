@@ -20,11 +20,13 @@ namespace ApiHandler.Controllers.Catalog
         [HttpGet("{id}")]
         public async Task<IActionResult> GetElement([FromHeader] string Authorization, int id)
         {
+            ResponseApi response = new ResponseApi();
             if (!jwt.ValidateJwtToken(Authorization))
             {
-                return Unauthorized();
+                response.code = "401";
+                response.message = "Unauthorized";
+                return Ok(response);
             }
-            ResponseApi response = new ResponseApi();
             response.code = "000";
             response.message = "Detalle de flujo";
             try
@@ -34,7 +36,7 @@ namespace ApiHandler.Controllers.Catalog
                 {
                     response.code = "404";
                     response.message = "Flujo no encontrado";
-                    return NotFound(response);
+                    return Ok(response);
                 }
                 response.data = flujo;
             }
@@ -43,18 +45,20 @@ namespace ApiHandler.Controllers.Catalog
                 response.code = "500";
                 response.message = ex.Message;
                 response.data = ex.StackTrace;
-                return StatusCode(500, response);
+                return Ok(response);
             }
             return Ok(response);
         }
         [HttpGet("list")]
         public async Task<IActionResult> List([FromHeader] string Authorization)
         {
+            ResponseApi response = new ResponseApi();
             if (!jwt.ValidateJwtToken(Authorization))
             {
-                return Unauthorized();
+                response.code = "401";
+                response.message = "Unauthorized";
+                return Ok(response);
             }
-            ResponseApi response = new ResponseApi();
             response.code = "000";
             response.message = "Listado de flujos";
             try
@@ -66,7 +70,7 @@ namespace ApiHandler.Controllers.Catalog
                 response.code = "500";
                 response.message = ex.Message;
                 response.data = ex.StackTrace;
-                return StatusCode(500, response);
+                return Ok(response);
             }
             return Ok(response);
         }
@@ -74,28 +78,24 @@ namespace ApiHandler.Controllers.Catalog
         public async Task<IActionResult> Add([FromHeader] string Authorization, [FromBody] NewFlujoRequest flujoRequest)
         {
 
+            ResponseApi response = new ResponseApi();
             if (!jwt.ValidateJwtToken(Authorization))
             {
-                return Unauthorized();
+                response.code = "401";
+                response.message = "Unauthorized";
+                return Ok(response);
             }
             if (!ModelState.IsValid)
             {
-                var validationErrors = ModelState
-                    .Where(kvp => kvp.Value?.Errors?.Count > 0)
-                    .ToDictionary(
-                        kvp => kvp.Key,
-                        kvp => kvp.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
-                    );
-
-                var badResponse = new ResponseApi
-                {
-                    code = "400",
-                    message = "Error de validación de campo",
-                    data = validationErrors
-                };
-                return BadRequest(badResponse);
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => string.IsNullOrWhiteSpace(e.ErrorMessage) ? e.Exception?.Message ?? "Solicitud inválida" : e.ErrorMessage)
+                    .ToList();
+                response.code = "400";
+                response.message = errors.FirstOrDefault() ?? "Solicitud inválida";
+                response.data = errors;
+                return Ok(response);
             }
-            ResponseApi response = new ResponseApi();
             Flujo flujo = new Flujo(0, flujoRequest.nombre, flujoRequest.detalle, true);
             try
             {
@@ -106,7 +106,7 @@ namespace ApiHandler.Controllers.Catalog
                 response.code = "500";
                 response.message = ex.Message;
                 response.data = ex.ToString();
-                return StatusCode(500, response);
+                return Ok(response);
             }
 
             response.code = "000";
@@ -117,34 +117,30 @@ namespace ApiHandler.Controllers.Catalog
         [HttpPut("edit")]
         public async Task<IActionResult> Edit([FromHeader] string Authorization, [FromBody] EditFlujoRequest flujoRequest)
         {
+            ResponseApi response = new ResponseApi();
             if (!jwt.ValidateJwtToken(Authorization))
             {
-                return Unauthorized();
+                response.code = "401";
+                response.message = "Unauthorized";
+                return Ok(response);
             }
             if (!ModelState.IsValid)
             {
-                var validationErrors = ModelState
-                    .Where(kvp => kvp.Value?.Errors?.Count > 0)
-                    .ToDictionary(
-                        kvp => kvp.Key,
-                        kvp => kvp.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
-                    );
-
-                var badResponse = new ResponseApi
-                {
-                    code = "400",
-                    message = "Error de validación de campo",
-                    data = validationErrors
-                };
-                return BadRequest(badResponse);
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => string.IsNullOrWhiteSpace(e.ErrorMessage) ? e.Exception?.Message ?? "Solicitud inválida" : e.ErrorMessage)
+                    .ToList();
+                response.code = "400";
+                response.message = errors.FirstOrDefault() ?? "Solicitud inválida";
+                response.data = errors;
+                return Ok(response);
             }
-            ResponseApi response = new ResponseApi();
             Flujo? flujo = await flujoService.GetByIdAsync(flujoRequest.id);
             if (flujo == null)
             {
                 response.code = "404";
                 response.message = "Flujo no encontrada";
-                return NotFound(response);
+                return Ok(response);
             }
             flujo.Nombre = flujoRequest.nombre;
             flujo.Detalle = flujoRequest.detalle;
@@ -157,7 +153,7 @@ namespace ApiHandler.Controllers.Catalog
                 response.code = "500";
                 response.message = ex.Message;
                 response.data = ex.ToString();
-                return StatusCode(500, response);
+                return Ok(response);
             }
             response.code = "000";
             response.message = "Flujo editado correctamente";
@@ -167,17 +163,19 @@ namespace ApiHandler.Controllers.Catalog
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromHeader] string Authorization, int id)
         {
+            ResponseApi response = new ResponseApi();
             if (!jwt.ValidateJwtToken(Authorization))
             {
-                return Unauthorized();
+                response.code = "401";
+                response.message = "Unauthorized";
+                return Ok(response);
             }
-            ResponseApi response = new ResponseApi();
             Flujo? flujo = await flujoService.GetByIdAsync(id);
             if (flujo == null)
             {
                 response.code = "404";
                 response.message = "Flujo no encontrada";
-                return NotFound(response);
+                return Ok(response);
             }
             flujo.Activo = false;
             try
@@ -189,7 +187,7 @@ namespace ApiHandler.Controllers.Catalog
                 response.code = "500";
                 response.message = ex.Message;
                 response.data = ex.StackTrace;
-                return StatusCode(500, response);
+                return Ok(response);
             }
             response.code = "000";
             response.message = "Flujo eliminado correctamente";

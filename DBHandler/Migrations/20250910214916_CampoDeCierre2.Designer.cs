@@ -12,8 +12,8 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace DBHandler.Migrations
 {
     [DbContext(typeof(DBHandlerContext))]
-    [Migration("20250727160132_InitClean")]
-    partial class InitClean
+    [Migration("20250910214916_CampoDeCierre2")]
+    partial class CampoDeCierre2
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,19 +36,32 @@ namespace DBHandler.Migrations
                     b.Property<bool>("Activo")
                         .HasColumnType("BOOLEAN");
 
-                    b.Property<int?>("EtapaDetalleId")
-                        .HasColumnType("NUMBER(10)");
-
                     b.Property<int?>("EtapaId")
                         .HasColumnType("NUMBER(10)");
+
+                    b.Property<int?>("FlujoId")
+                        .HasColumnType("NUMBER(10)");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("NVARCHAR2(100)");
 
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("NVARCHAR2(100)");
 
+                    b.Property<string>("Opciones")
+                        .HasColumnType("CLOB");
+
                     b.Property<int>("Orden")
                         .HasColumnType("NUMBER(10)");
+
+                    b.Property<string>("Placeholder")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("NVARCHAR2(255)");
 
                     b.Property<bool>("Requerido")
                         .HasColumnType("BOOLEAN");
@@ -61,9 +74,9 @@ namespace DBHandler.Migrations
 
                     b.HasIndex("Activo");
 
-                    b.HasIndex("EtapaDetalleId");
-
                     b.HasIndex("EtapaId");
+
+                    b.HasIndex("FlujoId");
 
                     b.ToTable("CAMPOS", (string)null);
                 });
@@ -81,6 +94,9 @@ namespace DBHandler.Migrations
 
                     b.Property<string>("Detalle")
                         .HasColumnType("NVARCHAR2(2000)");
+
+                    b.Property<bool>("FinDeFlujo")
+                        .HasColumnType("BOOLEAN");
 
                     b.Property<int>("FlujoId")
                         .HasColumnType("NUMBER(10)");
@@ -147,6 +163,16 @@ namespace DBHandler.Migrations
                     b.Property<bool>("Activo")
                         .HasColumnType("BOOLEAN");
 
+                    b.Property<int>("AsesorId")
+                        .HasColumnType("NUMBER(10)");
+
+                    b.Property<string>("Asunto")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR2(2000)");
+
+                    b.Property<string>("CampoValorJson")
+                        .HasColumnType("CLOB");
+
                     b.Property<string>("Codigo")
                         .IsRequired()
                         .HasColumnType("NVARCHAR2(450)");
@@ -171,13 +197,23 @@ namespace DBHandler.Migrations
                         .IsRequired()
                         .HasColumnType("NVARCHAR2(2000)");
 
+                    b.Property<string>("NombreArchivo")
+                        .HasColumnType("NVARCHAR2(2000)");
+
+                    b.Property<string>("NombreArchivoHash")
+                        .HasColumnType("NVARCHAR2(2000)");
+
+                    b.Property<int>("RemitenteId")
+                        .HasColumnType("NUMBER(10)");
+
                     b.Property<string>("Ubicacion")
-                        .IsRequired()
                         .HasColumnType("NVARCHAR2(2000)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("Activo");
+
+                    b.HasIndex("AsesorId");
 
                     b.HasIndex("Codigo")
                         .IsUnique();
@@ -190,6 +226,8 @@ namespace DBHandler.Migrations
 
                     b.HasIndex("FechaIngreso");
 
+                    b.HasIndex("RemitenteId");
+
                     b.ToTable("EXPEDIENTES", (string)null);
                 });
 
@@ -201,17 +239,48 @@ namespace DBHandler.Migrations
 
                     OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("AsesorAnteriorId")
+                        .HasColumnType("NUMBER(10)");
+
+                    b.Property<int>("AsesorNuevorId")
+                        .HasColumnType("NUMBER(10)");
+
+                    b.Property<int?>("EtapaAnteriorId")
+                        .HasColumnType("NUMBER(10)");
+
+                    b.Property<int?>("EtapaDetalleAnteriorId")
+                        .HasColumnType("NUMBER(10)");
+
+                    b.Property<int?>("EtapaDetalleNuevaId")
+                        .HasColumnType("NUMBER(10)");
+
+                    b.Property<int>("EtapaNuevaId")
+                        .HasColumnType("NUMBER(10)");
+
                     b.Property<int>("ExpedienteId")
                         .HasColumnType("NUMBER(10)");
 
                     b.Property<DateTime>("Fecha")
                         .HasColumnType("TIMESTAMP(7)");
 
-                    b.Property<string>("Responsable")
-                        .IsRequired()
+                    b.Property<string>("NombreArchivo")
+                        .HasColumnType("NVARCHAR2(2000)");
+
+                    b.Property<string>("NombreArchivoHash")
+                        .HasColumnType("NVARCHAR2(2000)");
+
+                    b.Property<string>("Ubicacion")
                         .HasColumnType("NVARCHAR2(2000)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("EtapaAnteriorId");
+
+                    b.HasIndex("EtapaDetalleAnteriorId");
+
+                    b.HasIndex("EtapaDetalleNuevaId");
+
+                    b.HasIndex("EtapaNuevaId");
 
                     b.HasIndex("ExpedienteId");
 
@@ -246,6 +315,29 @@ namespace DBHandler.Migrations
                     b.ToTable("FLUJOS", (string)null);
                 });
 
+            modelBuilder.Entity("DBHandler.Models.Remitente", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Activo")
+                        .HasColumnType("BOOLEAN");
+
+                    b.Property<string>("Descripcion")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("NVARCHAR2(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Activo");
+
+                    b.ToTable("REMITENTE", (string)null);
+                });
+
             modelBuilder.Entity("DBHandler.Models.Usuario", b =>
                 {
                     b.Property<int>("Id")
@@ -278,17 +370,17 @@ namespace DBHandler.Migrations
 
             modelBuilder.Entity("DBHandler.Models.Campo", b =>
                 {
-                    b.HasOne("DBHandler.Models.EtapaDetalle", "EtapaDetalle")
-                        .WithMany()
-                        .HasForeignKey("EtapaDetalleId");
-
                     b.HasOne("DBHandler.Models.Etapa", "Etapa")
                         .WithMany()
                         .HasForeignKey("EtapaId");
 
+                    b.HasOne("DBHandler.Models.Flujo", "Flujo")
+                        .WithMany("Campos")
+                        .HasForeignKey("FlujoId");
+
                     b.Navigation("Etapa");
 
-                    b.Navigation("EtapaDetalle");
+                    b.Navigation("Flujo");
                 });
 
             modelBuilder.Entity("DBHandler.Models.Etapa", b =>
@@ -315,6 +407,12 @@ namespace DBHandler.Migrations
 
             modelBuilder.Entity("DBHandler.Models.Expediente", b =>
                 {
+                    b.HasOne("DBHandler.Models.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("AsesorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("DBHandler.Models.EtapaDetalle", "EtapaDetalle")
                         .WithMany()
                         .HasForeignKey("EtapaDetalleId");
@@ -325,18 +423,54 @@ namespace DBHandler.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("DBHandler.Models.Remitente", "Remitente")
+                        .WithMany()
+                        .HasForeignKey("RemitenteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Etapa");
 
                     b.Navigation("EtapaDetalle");
+
+                    b.Navigation("Remitente");
+
+                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("DBHandler.Models.ExpedienteDetalle", b =>
                 {
+                    b.HasOne("DBHandler.Models.Etapa", "EtapaAnterior")
+                        .WithMany()
+                        .HasForeignKey("EtapaAnteriorId");
+
+                    b.HasOne("DBHandler.Models.EtapaDetalle", "EtapaDetalleAnterior")
+                        .WithMany()
+                        .HasForeignKey("EtapaDetalleAnteriorId");
+
+                    b.HasOne("DBHandler.Models.EtapaDetalle", "EtapaDetalleNueva")
+                        .WithMany()
+                        .HasForeignKey("EtapaDetalleNuevaId");
+
+                    b.HasOne("DBHandler.Models.Etapa", "EtapaNueva")
+                        .WithMany()
+                        .HasForeignKey("EtapaNuevaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("DBHandler.Models.Expediente", "Expediente")
                         .WithMany()
                         .HasForeignKey("ExpedienteId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("EtapaAnterior");
+
+                    b.Navigation("EtapaDetalleAnterior");
+
+                    b.Navigation("EtapaDetalleNueva");
+
+                    b.Navigation("EtapaNueva");
 
                     b.Navigation("Expediente");
                 });
@@ -348,6 +482,8 @@ namespace DBHandler.Migrations
 
             modelBuilder.Entity("DBHandler.Models.Flujo", b =>
                 {
+                    b.Navigation("Campos");
+
                     b.Navigation("Etapas");
                 });
 #pragma warning restore 612, 618

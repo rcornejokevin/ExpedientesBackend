@@ -22,6 +22,8 @@ namespace DBHandler.Models
         public string? Detalle { get; set; } = String.Empty;
         [Required]
         public bool Activo { get; set; } = true;
+        [Required]
+        public bool FinDeFlujo { get; set; } = false;
         [ForeignKey("Flujo")]
         [Required]
         public int FlujoId { get; set; }

@@ -23,11 +23,13 @@ namespace ApiHandler.Controllers.Catalog
         [HttpGet("list")]
         public async Task<IActionResult> List([FromHeader] string Authorization)
         {
+            ResponseApi response = new ResponseApi();
             if (!jwt.ValidateJwtToken(Authorization))
             {
-                return Unauthorized();
+                response.code = "401";
+                response.message = "Unauthorized";
+                return Ok(response);
             }
-            ResponseApi response = new ResponseApi();
             response.code = "000";
             response.message = "Listado de etapas";
             try
@@ -39,7 +41,7 @@ namespace ApiHandler.Controllers.Catalog
                 response.code = "500";
                 response.message = ex.Message;
                 response.data = ex.StackTrace;
-                return StatusCode(500, response);
+                return Ok(response);
             }
             return Ok(response);
         }
@@ -47,52 +49,49 @@ namespace ApiHandler.Controllers.Catalog
         public async Task<IActionResult> Add([FromHeader] string Authorization, [FromBody] NewEtapaRequest etapaRequest)
         {
 
+            ResponseApi response = new ResponseApi();
             if (!jwt.ValidateJwtToken(Authorization))
             {
-                return Unauthorized();
+                response.code = "401";
+                response.message = "Unauthorized";
+                return Ok(response);
             }
             if (!ModelState.IsValid)
             {
-                var validationErrors = ModelState
-                    .Where(kvp => kvp.Value?.Errors?.Count > 0)
-                    .ToDictionary(
-                        kvp => kvp.Key,
-                        kvp => kvp.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
-                    );
-
-                var badResponse = new ResponseApi
-                {
-                    code = "400",
-                    message = "Error de validación de campo",
-                    data = validationErrors
-                };
-                return BadRequest(badResponse);
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => string.IsNullOrWhiteSpace(e.ErrorMessage) ? e.Exception?.Message ?? "Solicitud inválida" : e.ErrorMessage)
+                    .ToList();
+                response.code = "400";
+                response.message = errors.FirstOrDefault() ?? "Solicitud inválida";
+                response.data = errors;
+                return Ok(response);
             }
             List<EtapaDb> listEtapaByFlujoId = await etapaService.GetAllByFlujoIdAsync(etapaRequest.flujoId);
-            ResponseApi response = new ResponseApi();
             EtapaDb etapa = new EtapaDb();
             etapa.Nombre = etapaRequest.nombre;
             etapa.Activo = true;
             etapa.Orden = listEtapaByFlujoId.Count() + 1;
             etapa.Detalle = etapaRequest.detalle;
             etapa.FlujoId = etapaRequest.flujoId;
+            etapa.FinDeFlujo = etapaRequest.finDeFlujo;
             try
             {
                 etapa = await etapaService.AddAsync(etapa);
             }
             catch (NotFoundException ex)
             {
-                response.code = "404";
+                response.code = "500";
                 response.message = ex.Message;
                 response.data = ex.StackTrace;
-                return StatusCode(500, response);
+                return Ok(response);
             }
             catch (Exception ex)
             {
                 response.code = "500";
                 response.message = ex.Message;
                 response.data = ex.StackTrace;
-                return StatusCode(500, response);
+                return Ok(response);
             }
 
             response.code = "000";
@@ -103,55 +102,52 @@ namespace ApiHandler.Controllers.Catalog
         [HttpPut("edit")]
         public async Task<IActionResult> Edit([FromHeader] string Authorization, [FromBody] EditEtapaRequest etapaRequest)
         {
+            ResponseApi response = new ResponseApi();
             if (!jwt.ValidateJwtToken(Authorization))
             {
-                return Unauthorized();
+                response.code = "401";
+                response.message = "Unauthorized";
+                return Ok(response);
             }
             if (!ModelState.IsValid)
             {
-                var validationErrors = ModelState
-                    .Where(kvp => kvp.Value?.Errors?.Count > 0)
-                    .ToDictionary(
-                        kvp => kvp.Key,
-                        kvp => kvp.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
-                    );
-
-                var badResponse = new ResponseApi
-                {
-                    code = "400",
-                    message = "Error de validación de campo",
-                    data = validationErrors
-                };
-                return BadRequest(badResponse);
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => string.IsNullOrWhiteSpace(e.ErrorMessage) ? e.Exception?.Message ?? "Solicitud inválida" : e.ErrorMessage)
+                    .ToList();
+                response.code = "400";
+                response.message = errors.FirstOrDefault() ?? "Solicitud inválida";
+                response.data = errors;
+                return Ok(response);
             }
-            ResponseApi response = new ResponseApi();
             EtapaDb? etapa = await etapaService.GetEtapaByIdAsync(etapaRequest.id);
             if (etapa == null)
             {
                 response.code = "404";
                 response.message = "Etapa no encontrada";
-                return NotFound(response);
+                return Ok(response);
             }
             etapa.Nombre = etapaRequest.nombre;
             etapa.Detalle = etapaRequest.detalle;
             etapa.FlujoId = etapaRequest.flujoId;
+            etapa.FinDeFlujo = etapaRequest.finDeFlujo;
             try
             {
                 etapa = await etapaService.EditAsync(etapa);
             }
             catch (NotFoundException ex)
             {
-                response.code = "404";
+                response.code = "500";
                 response.message = ex.Message;
                 response.data = ex.StackTrace;
-                return StatusCode(500, response);
+                return Ok(response);
             }
             catch (Exception ex)
             {
                 response.code = "500";
                 response.message = ex.Message;
                 response.data = ex.StackTrace;
-                return StatusCode(500, response);
+                return Ok(response);
             }
             response.code = "000";
             response.message = "Etapa editada correctamente";
@@ -161,27 +157,24 @@ namespace ApiHandler.Controllers.Catalog
         [HttpPut("orden")]
         public async Task<IActionResult> Orden([FromHeader] string Authorization, [FromBody] EditOrdenEtapaRequest etapaRequest)
         {
-            if (!jwt.ValidateJwtToken(Authorization)) return Unauthorized();
-
+            ResponseApi response = new ResponseApi();
+            if (!jwt.ValidateJwtToken(Authorization))
+            {
+                response.code = "401";
+                response.message = "Unauthorized";
+                return Ok(response);
+            }
             if (!ModelState.IsValid)
             {
-                var validationErrors = ModelState
-                    .Where(kvp => kvp.Value?.Errors?.Count > 0)
-                    .ToDictionary(
-                        kvp => kvp.Key,
-                        kvp => kvp.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
-                    );
-
-                var badResponse = new ResponseApi
-                {
-                    code = "400",
-                    message = "Error de validación de campo",
-                    data = validationErrors
-                };
-                return BadRequest(badResponse);
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => string.IsNullOrWhiteSpace(e.ErrorMessage) ? e.Exception?.Message ?? "Solicitud inválida" : e.ErrorMessage)
+                    .ToList();
+                response.code = "400";
+                response.message = errors.FirstOrDefault() ?? "Solicitud inválida";
+                response.data = errors;
+                return Ok(response);
             }
-
-            ResponseApi response = new ResponseApi();
             foreach (var item in etapaRequest.items)
             {
                 EtapaDb? etapa = await etapaService.GetEtapaByIdAsync(item.id);
@@ -200,17 +193,19 @@ namespace ApiHandler.Controllers.Catalog
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromHeader] string Authorization, int id)
         {
+            ResponseApi response = new ResponseApi();
             if (!jwt.ValidateJwtToken(Authorization))
             {
-                return Unauthorized();
+                response.code = "401";
+                response.message = "Unauthorized";
+                return Ok(response);
             }
-            ResponseApi response = new ResponseApi();
             EtapaDb? etapa = await etapaService.GetEtapaByIdAsync(id);
             if (etapa == null)
             {
                 response.code = "404";
                 response.message = "Etapa no encontrada";
-                return NotFound(response);
+                return Ok(response);
             }
             etapa.Activo = false;
             try
@@ -222,7 +217,7 @@ namespace ApiHandler.Controllers.Catalog
                 response.code = "500";
                 response.message = ex.Message;
                 response.data = ex.StackTrace;
-                return StatusCode(500, response);
+                return Ok(response);
             }
             response.code = "000";
             response.message = "Etapa eliminada correctamente";
@@ -231,11 +226,13 @@ namespace ApiHandler.Controllers.Catalog
         [HttpGet("{id}")]
         public async Task<IActionResult> GetElement([FromHeader] string Authorization, int id)
         {
+            ResponseApi response = new ResponseApi();
             if (!jwt.ValidateJwtToken(Authorization))
             {
-                return Unauthorized();
+                response.code = "401";
+                response.message = "Unauthorized";
+                return Ok(response);
             }
-            ResponseApi response = new ResponseApi();
             response.code = "000";
             response.message = "Detalle de etapa";
             try
@@ -245,7 +242,7 @@ namespace ApiHandler.Controllers.Catalog
                 {
                     response.code = "404";
                     response.message = "Etapa no encontrada";
-                    return NotFound(response);
+                    return Ok(response);
                 }
                 response.data = etapa;
             }
@@ -254,7 +251,7 @@ namespace ApiHandler.Controllers.Catalog
                 response.code = "500";
                 response.message = ex.Message;
                 response.data = ex.StackTrace;
-                return StatusCode(500, response);
+                return Ok(response);
             }
             return Ok(response);
         }

@@ -58,5 +58,13 @@ namespace DBHandler.Service.Catalog
                 .Where(u => u.Activo)
                 .FirstOrDefaultAsync();
         }
+        public async Task<EtapaDetalle?> getFirstEtapaDetalleByEtapaId(int etapaId)
+        {
+            return await dbContext.EtapaDetalles
+                .Where(u => u.Activo)
+                .Where(u => u.EtapaId == etapaId)
+                .OrderBy(u => u.Orden)
+                .FirstOrDefaultAsync();
+        }
     }
 }

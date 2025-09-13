@@ -1,47 +1,46 @@
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using ApiHandler.Models.Validations;
 namespace ApiHandler.Models.Catalog
 {
     public class NewCampoRequest
     {
-        [Required]
+        [Required(ErrorMessage = "El campo nombre es requerido")]
         public string nombre { get; set; } = String.Empty;
         public int? etapaId { get; set; }
         public int flujoId { get; set; }
-        [Required]
+        [Required(ErrorMessage = "El campo tipo de campo es requerido")]
         [RegularExpression("^(Texto|Numero|Fecha|Opciones|Cheque)$", ErrorMessage = "Campo inválido")]
         public string tipoCampo { get; set; } = String.Empty;
-        [Required]
+        [Required(ErrorMessage = "El orden es requerido")]
         public int orden { get; set; }
-        [Required]
+        [Required(ErrorMessage = "El campo \"requerido\" es requerido")]
         public bool requerido { get; set; }
-        [Required]
+        [Required(ErrorMessage = "El campo label es requerido")]
         public string label { get; set; } = String.Empty;
-        [Required]
+        [Required(ErrorMessage = "El campo placeHolder es requerido")]
         public string placeHolder { get; set; } = String.Empty;
         public string opciones { get; set; } = String.Empty;
     }
     public class EditCampoRequest
     {
-        [Required]
+        [Required(ErrorMessage = "El id es requerido")]
         [Range(1, int.MaxValue, ErrorMessage = "El id es requerido")]
         public int id { get; set; }
-        [Required]
+        [Required(ErrorMessage = "El campo nombre es requerido")]
         public string nombre { get; set; } = String.Empty;
 
         public int? etapaId { get; set; }
+        [Required(ErrorMessage = "El campo flujo es requerido")]
         public int flujoId { get; set; }
-        [Required]
+        [Required(ErrorMessage = "El campo tipo de campo es requerido")]
         [RegularExpression("^(Texto|Numero|Fecha|Opciones|Cheque)$", ErrorMessage = "Campo inválido")]
         public string tipoCampo { get; set; } = String.Empty;
-        [Required]
+        [Required(ErrorMessage = "El campo orden es requerido")]
         public int orden { get; set; }
-        [Required]
+        [Required(ErrorMessage = "El campo \"requerido\" es requerido")]
         public bool requerido { get; set; }
-        [Required]
+        [Required(ErrorMessage = "El campo label es requerido")]
         public string label { get; set; } = String.Empty;
-        [Required]
+        [Required(ErrorMessage = "El campo placeHolder es requerido")]
         public string placeHolder { get; set; } = String.Empty;
         public string opciones { get; set; } = String.Empty;
     }

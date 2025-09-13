@@ -30,11 +30,13 @@ namespace ApiHandler.Controllers.Catalog
         [HttpGet("{id}")]
         public async Task<IActionResult> GetElement([FromHeader] string Authorization, int id)
         {
+            ResponseApi response = new ResponseApi();
             if (!jwt.ValidateJwtToken(Authorization))
             {
-                return Unauthorized();
+                response.code = "401";
+                response.message = "Unauthorized";
+                return Ok(response);
             }
-            ResponseApi response = new ResponseApi();
             response.code = "000";
             response.message = "Detalle de campo";
             try
@@ -44,7 +46,7 @@ namespace ApiHandler.Controllers.Catalog
                 {
                     response.code = "404";
                     response.message = "Campo no encontrado";
-                    return NotFound(response);
+                    return Ok(response);
                 }
                 response.data = campo;
             }
@@ -53,18 +55,31 @@ namespace ApiHandler.Controllers.Catalog
                 response.code = "500";
                 response.message = ex.Message;
                 response.data = ex.StackTrace;
-                return StatusCode(500, response);
+                return Ok(response);
             }
             return Ok(response);
         }
         [HttpGet("list")]
         public async Task<IActionResult> List([FromHeader] string Authorization)
         {
+            ResponseApi response = new ResponseApi();
             if (!jwt.ValidateJwtToken(Authorization))
             {
-                return Unauthorized();
+                response.code = "401";
+                response.message = "Unauthorized";
+                return Ok(response);
             }
-            ResponseApi response = new ResponseApi();
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => string.IsNullOrWhiteSpace(e.ErrorMessage) ? e.Exception?.Message ?? "Solicitud inválida" : e.ErrorMessage)
+                    .ToList();
+                response.code = "400";
+                response.message = errors.FirstOrDefault() ?? "Solicitud inválida";
+                response.data = errors;
+                return Ok(response);
+            }
             response.code = "000";
             response.message = "Listado de campos";
             try
@@ -76,7 +91,7 @@ namespace ApiHandler.Controllers.Catalog
                 response.code = "500";
                 response.message = ex.Message;
                 response.data = ex.StackTrace;
-                return StatusCode(500, response);
+                return Ok(response);
             }
             return Ok(response);
         }
@@ -84,28 +99,24 @@ namespace ApiHandler.Controllers.Catalog
         public async Task<IActionResult> Add([FromHeader] string Authorization, [FromBody] NewCampoRequest campoRequest)
         {
 
+            ResponseApi response = new ResponseApi();
             if (!jwt.ValidateJwtToken(Authorization))
             {
-                return Unauthorized();
+                response.code = "401";
+                response.message = "Unauthorized";
+                return Ok(response);
             }
             if (!ModelState.IsValid)
             {
-                var validationErrors = ModelState
-                    .Where(kvp => kvp.Value?.Errors?.Count > 0)
-                    .ToDictionary(
-                        kvp => kvp.Key,
-                        kvp => kvp.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
-                    );
-
-                var badResponse = new ResponseApi
-                {
-                    code = "400",
-                    message = "Error de validación de campo",
-                    data = validationErrors
-                };
-                return BadRequest(badResponse);
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => string.IsNullOrWhiteSpace(e.ErrorMessage) ? e.Exception?.Message ?? "Solicitud inválida" : e.ErrorMessage)
+                    .ToList();
+                response.code = "400";
+                response.message = errors.FirstOrDefault() ?? "Solicitud inválida";
+                response.data = errors;
+                return Ok(response);
             }
-            ResponseApi response = new ResponseApi();
             Campo campo = new Campo();
             campo.Nombre = campoRequest.nombre;
             campo.EtapaId = campoRequest.etapaId == 0 ? null : campoRequest.etapaId;
@@ -124,20 +135,20 @@ namespace ApiHandler.Controllers.Catalog
             {
                 response.code = "404";
                 response.message = ex.Message;
-                return NotFound(response);
+                return Ok(response);
             }
             catch (ArgumentException ex)
             {
                 response.code = "400";
                 response.message = ex.Message;
-                return BadRequest(response);
+                return Ok(response);
             }
             catch (Exception ex)
             {
                 response.code = "500";
                 response.message = ex.Message;
                 response.data = ex.ToString();
-                return StatusCode(500, response);
+                return Ok(response);
             }
             response.code = "000";
             response.message = "Campo creado correctamente";
@@ -147,34 +158,30 @@ namespace ApiHandler.Controllers.Catalog
         [HttpPut("edit")]
         public async Task<IActionResult> Edit([FromHeader] string Authorization, [FromBody] EditCampoRequest campoRequest)
         {
+            ResponseApi response = new ResponseApi();
             if (!jwt.ValidateJwtToken(Authorization))
             {
-                return Unauthorized();
+                response.code = "401";
+                response.message = "Unauthorized";
+                return Ok(response);
             }
             if (!ModelState.IsValid)
             {
-                var validationErrors = ModelState
-                    .Where(kvp => kvp.Value?.Errors?.Count > 0)
-                    .ToDictionary(
-                        kvp => kvp.Key,
-                        kvp => kvp.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
-                    );
-
-                var badResponse = new ResponseApi
-                {
-                    code = "400",
-                    message = "Error de validación de campo",
-                    data = validationErrors
-                };
-                return BadRequest(badResponse);
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => string.IsNullOrWhiteSpace(e.ErrorMessage) ? e.Exception?.Message ?? "Solicitud inválida" : e.ErrorMessage)
+                    .ToList();
+                response.code = "400";
+                response.message = errors.FirstOrDefault() ?? "Solicitud inválida";
+                response.data = errors;
+                return Ok(response);
             }
-            ResponseApi response = new ResponseApi();
             Campo? campo = await campoService.GetByIdAsync(campoRequest.id);
             if (campo == null)
             {
                 response.code = "404";
                 response.message = "Campo no encontrada";
-                return NotFound(response);
+                return Ok(response);
             }
             campo.Nombre = campoRequest.nombre;
             campo.EtapaId = campoRequest.etapaId == 0 ? null : campoRequest.etapaId;
@@ -193,20 +200,20 @@ namespace ApiHandler.Controllers.Catalog
             {
                 response.code = "404";
                 response.message = ex.Message;
-                return NotFound(response);
+                return Ok(response);
             }
             catch (ArgumentException ex)
             {
                 response.code = "400";
                 response.message = ex.Message;
-                return BadRequest(response);
+                return Ok(response);
             }
             catch (Exception ex)
             {
                 response.code = "500";
                 response.message = ex.Message;
                 response.data = ex.ToString();
-                return StatusCode(500, response);
+                return Ok(response);
             }
             response.code = "000";
             response.message = "Campo editado correctamente";
@@ -216,37 +223,45 @@ namespace ApiHandler.Controllers.Catalog
         [HttpPut("orden")]
         public async Task<IActionResult> Orden([FromHeader] string Authorization, [FromBody] EditOrdenEtapaRequest etapaRequest)
         {
-            if (!jwt.ValidateJwtToken(Authorization)) return Unauthorized();
-
+            ResponseApi response = new ResponseApi();
+            if (!jwt.ValidateJwtToken(Authorization))
+            {
+                response.code = "401";
+                response.message = "Unauthorized";
+                return Ok(response);
+            }
             if (!ModelState.IsValid)
             {
-                var validationErrors = ModelState
-                    .Where(kvp => kvp.Value?.Errors?.Count > 0)
-                    .ToDictionary(
-                        kvp => kvp.Key,
-                        kvp => kvp.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
-                    );
-
-                var badResponse = new ResponseApi
-                {
-                    code = "400",
-                    message = "Error de validación de campo",
-                    data = validationErrors
-                };
-                return BadRequest(badResponse);
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => string.IsNullOrWhiteSpace(e.ErrorMessage) ? e.Exception?.Message ?? "Solicitud inválida" : e.ErrorMessage)
+                    .ToList();
+                response.code = "400";
+                response.message = errors.FirstOrDefault() ?? "Solicitud inválida";
+                response.data = errors;
+                return Ok(response);
             }
 
-            ResponseApi response = new ResponseApi();
-            foreach (var item in etapaRequest.items)
+            try
             {
-                Campo? campo = await campoService.GetByIdAsync(item.id);
-                if (campo != null)
+                foreach (var item in etapaRequest.items)
                 {
-                    campo.Orden = item.orden;
-                    await campoService.EditAsync(campo);
+                    Campo? campo = await campoService.GetByIdAsync(item.id);
+                    if (campo != null)
+                    {
+                        campo.Orden = item.orden;
+                        await campoService.EditAsync(campo);
+                    }
                 }
-            }
 
+            }
+            catch (Exception ex)
+            {
+                response.code = "500";
+                response.message = ex.Message;
+                response.data = ex.StackTrace;
+                return Ok(response);
+            }
             response.code = "000";
             response.message = "Campo ordenada correctamente";
             response.data = new { };
@@ -255,17 +270,19 @@ namespace ApiHandler.Controllers.Catalog
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromHeader] string Authorization, int id)
         {
+            ResponseApi response = new ResponseApi();
             if (!jwt.ValidateJwtToken(Authorization))
             {
-                return Unauthorized();
+                response.code = "401";
+                response.message = "Unauthorized";
+                return Ok(response);
             }
-            ResponseApi response = new ResponseApi();
             Campo? campo = await campoService.GetByIdAsync(id);
             if (campo == null)
             {
                 response.code = "404";
                 response.message = "Campo no encontrada";
-                return NotFound(response);
+                return Ok(response);
             }
             campo.Activo = false;
             try
@@ -277,7 +294,7 @@ namespace ApiHandler.Controllers.Catalog
                 response.code = "500";
                 response.message = ex.Message;
                 response.data = ex.StackTrace;
-                return StatusCode(500, response);
+                return Ok(response);
             }
             response.code = "000";
             response.message = "Campo eliminado correctamente";
