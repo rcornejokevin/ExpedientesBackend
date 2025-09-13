@@ -1,0 +1,56 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs / Editors
+.vs/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build output
+bin/
+obj/
+out/
+
+# Tests / Coverage
+TestResults/
+coverage/
+
+# Logs / Temp
+*.log
+logs/
+*.pid
+*.seed
+*.tmp
+tmp/
+
+# Environment / Config (secrets)
+*.env
+.env
+.env.*
+appsettings.json
+appsettings.*.json
+
+# EF Core tools cache
+*.db
+*.mdf
+*.ldf
+*.sqlite
+*.db-wal
+*.db-shm
+
+# Local storage for uploaded/generated files
+uploads/
+storage/
+files/
+
+# Rider
+.Rider*/
+
