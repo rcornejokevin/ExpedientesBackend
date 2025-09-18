@@ -267,6 +267,36 @@ namespace BusinessLogic.Services
 
             var details = await casesDetailService.GetAllByDateRangeWithEtapaAsync(monthStart, nextMonthStart);
 
+            // Construir intervalos de asignación (arrastrar hasta cambio de asesor)
+            var detailsByExp = details
+                .OrderBy(d => d.Fecha)
+                .GroupBy(d => d.ExpedienteId)
+                .ToList();
+
+            var assignmentIntervals = new List<(int expedienteId, DateTime start, DateTime end)>();
+            foreach (var grp in detailsByExp)
+            {
+                var events = grp.OrderBy(e => e.Fecha).ToList();
+                for (int i = 0; i < events.Count; i++)
+                {
+                    var ev = events[i];
+                    var isStart = ev.AsesorNuevorId == user.Id && (ev.AsesorAnteriorId == null || ev.AsesorAnteriorId != user.Id);
+                    if (!isStart) continue;
+
+                    var start = ev.Fecha.Date;
+                    var endEvent = events.Skip(i + 1).FirstOrDefault(e => e.AsesorNuevorId != user.Id);
+                    var end = (endEvent != null ? endEvent.Fecha.Date : nextMonthStart.Date);
+
+                    if (end <= monthStart.Date || start >= nextMonthStart.Date) continue;
+                    if (start < monthStart.Date) start = monthStart.Date;
+                    if (end > nextMonthStart.Date) end = nextMonthStart.Date;
+                    if (end > start)
+                    {
+                        assignmentIntervals.Add((grp.Key, start, end));
+                    }
+                }
+            }
+
             // Serie por día del mes actual
             var daysInMonth = Enumerable.Range(0, (nextMonthStart - monthStart).Days)
                 .Select(offset => monthStart.AddDays(offset).Date)
@@ -275,11 +305,9 @@ namespace BusinessLogic.Services
             var series = daysInMonth.Select(day => new
             {
                 date = day.Day.ToString(),
-                assigned = details
-                    .Where(d => d.AsesorNuevorId == user.Id)
-                    .Where(d => !string.IsNullOrWhiteSpace(d.EstatusNuevo) && d.EstatusNuevo.Trim().Equals("Abierto", StringComparison.OrdinalIgnoreCase))
-                    .Where(d => d.Fecha.Date == day)
-                    .Select(d => d.ExpedienteId)
+                assigned = assignmentIntervals
+                    .Where(iv => day >= iv.start && day < iv.end)
+                    .Select(iv => iv.expedienteId)
                     .Distinct()
                     .Count(),
                 attended = details
