@@ -1,10 +1,23 @@
+using System;
 using System.IO;
 using System.Diagnostics;
+using Microsoft.Extensions.Configuration;
 
 namespace BusinessLogic.Services
 {
     public class FileLogic
     {
+        private readonly string pdftoppmCmd;
+        private readonly string gsCmd;
+
+        public FileLogic(IConfiguration configuration)
+        {
+            var isWindows = OperatingSystem.IsWindows();
+            pdftoppmCmd = configuration["Tools:PdftoppmPath"]
+                ?? (isWindows ? "pdftoppm.exe" : "pdftoppm");
+            gsCmd = configuration["Tools:GhostscriptPath"]
+                ?? (isWindows ? "gswin64c.exe" : "gs");
+        }
         public async Task UploadFileAsync(FileInfo file, string uploadPath)
         {
             if (file == null) throw new ArgumentNullException(nameof(file));
@@ -79,9 +92,9 @@ namespace BusinessLogic.Services
 
                 if (ext == ".pdf")
                 {
-                    if (!TryGeneratePdfThumbWithPdftoppm(destinationPath, uploadPath, baseName))
+                    if (!TryGeneratePdfThumbWithPdftoppm(destinationPath, uploadPath, baseName, pdftoppmCmd))
                     {
-                        TryGeneratePdfThumbWithGhostscript(destinationPath, uploadPath, baseName);
+                        TryGeneratePdfThumbWithGhostscript(destinationPath, uploadPath, baseName, gsCmd);
                     }
                 }
                 else if (ext == ".jpg" || ext == ".jpeg" || ext == ".png")
@@ -134,8 +147,7 @@ namespace BusinessLogic.Services
 
             try
             {
-                // Intenta diferentes estrategias de concatenación
-                if (!TryConcatWithGhostscript(targetPdfPath, tempNew, tempOut))
+                if (!TryConcatWithGhostscript(targetPdfPath, tempNew, tempOut, gsCmd))
                 {
                     if (!TryConcatWithPdfUnite(targetPdfPath, tempNew, tempOut))
                     {
@@ -210,7 +222,7 @@ namespace BusinessLogic.Services
 
             try
             {
-                if (!TryConcatWithGhostscript(basePdfPath, tempNew, tempOut))
+                if (!TryConcatWithGhostscript(basePdfPath, tempNew, tempOut, gsCmd))
                 {
                     if (!TryConcatWithPdfUnite(basePdfPath, tempNew, tempOut))
                     {
@@ -224,16 +236,15 @@ namespace BusinessLogic.Services
                 // Mueve el resultado al archivo definitivo (sin tocar el original)
                 File.Move(tempOut, candidateOut);
 
-                // Genera miniatura como en guardado normal
                 try
                 {
                     var baseName = Path.GetFileNameWithoutExtension(candidateOut);
                     var ext = (Path.GetExtension(candidateOut) ?? string.Empty).ToLowerInvariant();
                     if (ext == ".pdf")
                     {
-                        if (!TryGeneratePdfThumbWithPdftoppm(candidateOut, outputDir, baseName))
+                        if (!TryGeneratePdfThumbWithPdftoppm(candidateOut, outputDir, baseName, pdftoppmCmd))
                         {
-                            TryGeneratePdfThumbWithGhostscript(candidateOut, outputDir, baseName);
+                            TryGeneratePdfThumbWithGhostscript(candidateOut, outputDir, baseName, gsCmd);
                         }
                     }
                 }
@@ -248,12 +259,12 @@ namespace BusinessLogic.Services
             }
         }
 
-        private static bool TryConcatWithGhostscript(string basePdf, string appendPdf, string outPdf)
+        private static bool TryConcatWithGhostscript(string basePdf, string appendPdf, string outPdf, string gsExecutable)
         {
             try
             {
                 var p = new Process();
-                p.StartInfo.FileName = "gs";
+                p.StartInfo.FileName = gsExecutable;
                 p.StartInfo.ArgumentList.Add("-dBATCH");
                 p.StartInfo.ArgumentList.Add("-dNOPAUSE");
                 p.StartInfo.ArgumentList.Add("-q");
@@ -265,7 +276,7 @@ namespace BusinessLogic.Services
                 p.StartInfo.RedirectStandardError = true;
                 p.StartInfo.RedirectStandardOutput = true;
                 p.Start();
-                if (!p.WaitForExit(20000))
+                if (!p.WaitForExit(30000))
                 {
                     try { p.Kill(entireProcessTree: true); } catch { }
                     return false;
@@ -288,7 +299,7 @@ namespace BusinessLogic.Services
                 p.StartInfo.RedirectStandardError = true;
                 p.StartInfo.RedirectStandardOutput = true;
                 p.Start();
-                if (!p.WaitForExit(20000))
+                if (!p.WaitForExit(30000))
                 {
                     try { p.Kill(entireProcessTree: true); } catch { }
                     return false;
@@ -314,7 +325,7 @@ namespace BusinessLogic.Services
                 p.StartInfo.RedirectStandardError = true;
                 p.StartInfo.RedirectStandardOutput = true;
                 p.Start();
-                if (!p.WaitForExit(20000))
+                if (!p.WaitForExit(30000))
                 {
                     try { p.Kill(entireProcessTree: true); } catch { }
                     return false;
@@ -324,12 +335,12 @@ namespace BusinessLogic.Services
             catch { return false; }
         }
 
-        private static bool TryGeneratePdfThumbWithPdftoppm(string pdfPath, string outputDir, string baseName)
+        private static bool TryGeneratePdfThumbWithPdftoppm(string pdfPath, string outputDir, string baseName, string pdftoppmExecutable)
         {
             try
             {
                 var process = new System.Diagnostics.Process();
-                process.StartInfo.FileName = "pdftoppm";
+                process.StartInfo.FileName = pdftoppmExecutable;
                 process.StartInfo.ArgumentList.Add("-f");
                 process.StartInfo.ArgumentList.Add("1");
                 process.StartInfo.ArgumentList.Add("-l");
@@ -344,7 +355,7 @@ namespace BusinessLogic.Services
                 process.StartInfo.RedirectStandardError = true;
                 process.StartInfo.RedirectStandardOutput = true;
                 process.Start();
-                if (!process.WaitForExit(10000))
+                if (!process.WaitForExit(30000))
                 {
                     try { process.Kill(entireProcessTree: true); } catch { }
                     return false;
@@ -362,13 +373,13 @@ namespace BusinessLogic.Services
             return false;
         }
 
-        private static bool TryGeneratePdfThumbWithGhostscript(string pdfPath, string outputDir, string baseName)
+        private static bool TryGeneratePdfThumbWithGhostscript(string pdfPath, string outputDir, string baseName, string gsExecutable)
         {
             try
             {
                 var thumb = System.IO.Path.Combine(outputDir, $"{baseName}_thumb.png");
                 var process = new System.Diagnostics.Process();
-                process.StartInfo.FileName = "gs";
+                process.StartInfo.FileName = gsExecutable;
                 process.StartInfo.ArgumentList.Add("-sDEVICE=png16m");
                 process.StartInfo.ArgumentList.Add("-dFirstPage=1");
                 process.StartInfo.ArgumentList.Add("-dLastPage=1");
@@ -380,7 +391,7 @@ namespace BusinessLogic.Services
                 process.StartInfo.RedirectStandardError = true;
                 process.StartInfo.RedirectStandardOutput = true;
                 process.Start();
-                if (!process.WaitForExit(10000))
+                if (!process.WaitForExit(30000))
                 {
                     try { process.Kill(entireProcessTree: true); } catch { }
                     return false;

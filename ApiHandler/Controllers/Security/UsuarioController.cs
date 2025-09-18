@@ -114,6 +114,7 @@ namespace ApiHandler.Controllers.Security
                 }
                 user.Username = userRequest.username ?? "";
                 user.Perfil = userRequest.perfil ?? "";
+                user.Operativo = userRequest.operativo;
                 try
                 {
                     user = await usuarioService.updateAsync(user);

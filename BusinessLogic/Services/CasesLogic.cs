@@ -27,6 +27,14 @@ namespace BusinessLogic.Services
             this.etapaService = etapaService;
             this.etapaDetalleService = etapaDetalleService;
         }
+        public async Task<string> GetCodeByFlujo(Flujo flujo)
+        {
+            Filters filters = new Filters();
+            List<Expediente> list = await casesService.GetAllAsync(filters);
+            int correlativo = list.Count() + 1;
+            string correlativoString = correlativo.ToString().PadLeft(3, '0');
+            return correlativoString + flujo.Correlativo + DateTime.UtcNow.Year;
+        }
         public static string HashNombre(string nombre)
         {
             string randomPart = DateTime.UtcNow.ToString("yyyyMMddHHmmssfff");
@@ -71,10 +79,6 @@ namespace BusinessLogic.Services
             {
                 throw new DirectoryNotFoundException("El directorio de carga no existe. ");
             }
-            if (expediente.EtapaDetalleId == 0 && expediente.EtapaId == 0)
-            {
-                throw new ArgumentException("El expediente debe tener una etapa o subetapa asignada.");
-            }
             if (!string.IsNullOrWhiteSpace(expediente.NombreArchivo) && !string.IsNullOrWhiteSpace(archivoBase64))
             {
                 var hash = HashNombre(expediente.NombreArchivo);
@@ -87,6 +91,7 @@ namespace BusinessLogic.Services
 
                 expediente.Ubicacion = uploadDir;
             }
+
             Etapa? etapaFirst = await etapaService.getFirstEtapaByFlujoId(flujoId);
             if (etapaFirst != null)
             {
@@ -188,23 +193,20 @@ namespace BusinessLogic.Services
                     }
                     var targetPath = Path.Combine(currentDir, currentName);
 
-                    // Genera un nuevo nombre de archivo (hash + extensión) y conserva el original en carpeta
                     var extension = Path.GetExtension(expediente.NombreArchivo);
                     var newHash = HashNombre(expediente.NombreArchivo);
                     var newFileName = string.IsNullOrWhiteSpace(extension) ? newHash : $"{newHash}{extension}";
                     var outPath = Path.Combine(currentDir, newFileName);
 
                     await fileLogic.AppendPdfBase64ToNewFileAsync(followCaseVar.archivo, targetPath, outPath);
-
-                    // Actualiza el expediente para apuntar al nuevo archivo combinado
                     expediente.NombreArchivoHash = newFileName;
                     expediente.Ubicacion = currentDir;
                 }
             }
-            //expediente.AsesorId = followCaseVar.asesor;
             expediente.EtapaId = followCaseVar.etapaId;
             expediente.EtapaDetalleId = followCaseVar.subEtapaId;
             expediente.AsesorId = followCaseVar.asesor == 0 ? expediente.AsesorId : followCaseVar.asesor;
+            expediente.CampoValorJson = followCaseVar.campos;
             await casesService.EditAsync(expediente);
             await newDetailCasesByCases(expediente, followCaseVar);
         }
@@ -213,10 +215,6 @@ namespace BusinessLogic.Services
             if (oldExpediente == null)
             {
                 throw new ArgumentException("El expediente no existe.");
-            }
-            if (oldExpediente.EtapaId == followCase.etapaId && oldExpediente.EtapaDetalleId == followCase.subEtapaId)
-            {
-                throw new ArgumentException("No se detecto un cambio en la etapa o subetapa.");
             }
             if (followCase.etapaId == 0 && followCase.subEtapaId == 0)
             {
@@ -242,9 +240,9 @@ namespace BusinessLogic.Services
                     throw new ArgumentException("La subetapa no existe.");
                 }
             }
-            if (followCase.subEtapaId != 0)
+            if (followCase.subEtapaId != 0 && followCase.subEtapaId != null)
             {
-                subEtapaNew = await etapaDetalleService.GetByIdAsync(followCase.subEtapaId);
+                subEtapaNew = await etapaDetalleService.GetByIdAsync(followCase.subEtapaId ?? 0);
                 if (subEtapaNew == null)
                 {
                     throw new ArgumentException("La subetapa no existe.");
@@ -269,9 +267,6 @@ namespace BusinessLogic.Services
 
             var details = await casesDetailService.GetAllByDateRangeWithEtapaAsync(monthStart, nextMonthStart);
 
-            var assigned = details.Where(d => d.AsesorNuevorId == user.Id).ToList();
-            var attended = details.Where(d => d.AsesorAnteriorId == user.Id).ToList();
-
             // Serie por día del mes actual
             var daysInMonth = Enumerable.Range(0, (nextMonthStart - monthStart).Days)
                 .Select(offset => monthStart.AddDays(offset).Date)
@@ -279,73 +274,86 @@ namespace BusinessLogic.Services
 
             var series = daysInMonth.Select(day => new
             {
-                date = day.ToString("yyyy-MM-dd"),
-                assigned = assigned.Count(d => d.Fecha.Date == day),
-                attended = attended.Count(d => d.Fecha.Date == day)
+                date = day.Day.ToString(),
+                assigned = details
+                    .Where(d => d.AsesorNuevorId == user.Id)
+                    .Where(d => !string.IsNullOrWhiteSpace(d.EstatusNuevo) && d.EstatusNuevo.Trim().Equals("Abierto", StringComparison.OrdinalIgnoreCase))
+                    .Where(d => d.Fecha.Date == day)
+                    .Select(d => d.ExpedienteId)
+                    .Distinct()
+                    .Count(),
+                attended = details
+                    .Where(d => d.AsesorNuevorId == user.Id)
+                    .Where(d => !string.IsNullOrWhiteSpace(d.EstatusAnterior) && d.EstatusAnterior.Trim().Equals("Abierto", StringComparison.OrdinalIgnoreCase))
+                    .Where(d => !string.IsNullOrWhiteSpace(d.EstatusNuevo) && d.EstatusNuevo.Trim().Equals("Cerrado", StringComparison.OrdinalIgnoreCase))
+                    .Where(d => d.Fecha.Date == day)
+                    .Select(d => d.ExpedienteId)
+                    .Distinct()
+                    .Count()
             }).ToList();
 
-            // Tipos por flujo (asignados)
-            var assignedByType = assigned
-                .GroupBy(d => new
+            // Eventos del mes para pies (deduplicados por expediente)
+            var assignedEvents = details
+                .Where(d => d.AsesorNuevorId == user.Id)
+                .Where(d => !string.IsNullOrWhiteSpace(d.EstatusNuevo) && d.EstatusNuevo.Trim().Equals("Abierto", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            var attendedEvents = details
+                .Where(d => d.AsesorNuevorId == user.Id)
+                .Where(d => !string.IsNullOrWhiteSpace(d.EstatusAnterior) && d.EstatusAnterior.Trim().Equals("Abierto", StringComparison.OrdinalIgnoreCase))
+                .Where(d => !string.IsNullOrWhiteSpace(d.EstatusNuevo) && d.EstatusNuevo.Trim().Equals("Cerrado", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            var assignedUniqueExp = assignedEvents
+                .GroupBy(d => d.ExpedienteId)
+                .Select(g => new
                 {
-                    flujoId = d.EtapaNueva?.FlujoId ?? 0,
-                    flujo = d.EtapaNueva?.Flujo?.Nombre ?? string.Empty
+                    expedienteId = g.Key,
+                    flujoId = g.Select(x => x.EtapaNueva?.FlujoId ?? 0).FirstOrDefault(),
+                    flujo = g.Select(x => x.EtapaNueva?.Flujo?.Nombre ?? string.Empty).FirstOrDefault()
                 })
+                .ToList();
+            var attendedUniqueExp = attendedEvents
+                .GroupBy(d => d.ExpedienteId)
+                .Select(g => new
+                {
+                    expedienteId = g.Key,
+                    flujoId = g.Select(x => x.EtapaNueva?.FlujoId ?? 0).FirstOrDefault(),
+                    flujo = g.Select(x => x.EtapaNueva?.Flujo?.Nombre ?? string.Empty).FirstOrDefault()
+                })
+                .ToList();
+
+            var totalAssignedExp = assignedUniqueExp.Count;
+            var totalAttendedExp = attendedUniqueExp.Count;
+
+            var assignedByType = assignedUniqueExp
+                .GroupBy(x => new { x.flujoId, x.flujo })
                 .Select(g => new
                 {
                     flowId = g.Key.flujoId,
                     flow = string.IsNullOrWhiteSpace(g.Key.flujo) ? $"Flujo {g.Key.flujoId}" : g.Key.flujo,
-                    count = g.Count()
+                    count = g.Count(),
+                    percent = totalAssignedExp == 0 ? 0 : Math.Round((decimal)g.Count() * 100m / totalAssignedExp, 2)
                 })
                 .OrderByDescending(x => x.count)
                 .ToList();
 
-            // Tipos por flujo (atendidos)
-            var attendedByType = attended
-                .GroupBy(d => new
-                {
-                    flujoId = d.EtapaNueva?.FlujoId ?? 0,
-                    flujo = d.EtapaNueva?.Flujo?.Nombre ?? string.Empty
-                })
+            var attendedByType = attendedUniqueExp
+                .GroupBy(x => new { x.flujoId, x.flujo })
                 .Select(g => new
                 {
                     flowId = g.Key.flujoId,
                     flow = string.IsNullOrWhiteSpace(g.Key.flujo) ? $"Flujo {g.Key.flujoId}" : g.Key.flujo,
-                    count = g.Count()
+                    count = g.Count(),
+                    percent = totalAttendedExp == 0 ? 0 : Math.Round((decimal)g.Count() * 100m / totalAttendedExp, 2)
                 })
                 .OrderByDescending(x => x.count)
-                .ToList();
-
-            var totalAssigned = assigned.Count;
-            var totalAttended = attended.Count;
-
-            var assignedByTypeWithPct = assignedByType
-                .Select(x => new
-                {
-                    x.flowId,
-                    x.flow,
-                    x.count,
-                    percent = totalAssigned == 0 ? 0 : Math.Round((decimal)x.count * 100m / totalAssigned, 2)
-                })
-                .ToList();
-
-            var attendedByTypeWithPct = attendedByType
-                .Select(x => new
-                {
-                    x.flowId,
-                    x.flow,
-                    x.count,
-                    percent = totalAttended == 0 ? 0 : Math.Round((decimal)x.count * 100m / totalAttended, 2)
-                })
                 .ToList();
 
             return new
             {
-                month = monthStart.ToString("yyyy-MM"),
-                totals = new { assigned = totalAssigned, attended = totalAttended },
                 series,
-                assignedByType = assignedByTypeWithPct,
-                attendedByType = attendedByTypeWithPct
+                assignedByType,
+                attendedByType
             };
         }
     }

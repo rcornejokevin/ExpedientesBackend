@@ -19,15 +19,17 @@ namespace ApiHandler.Controllers.Catalog
         public CasesLogic casesLogic;
         public CasesService casesService;
         public CasesDetailService casesDetailService;
+        public FlujoService flujoService;
         public UsuarioService usuarioService;
         [ActivatorUtilitiesConstructor]
-        public CasesController(Jwt jwt, CasesLogic casesLogic, CasesService casesService, CasesDetailService casesDetailService, UsuarioService usuarioService)
+        public CasesController(Jwt jwt, CasesLogic casesLogic, CasesService casesService, CasesDetailService casesDetailService, UsuarioService usuarioService, FlujoService flujoService)
         {
             this.jwt = jwt;
             this.casesLogic = casesLogic;
             this.casesService = casesService;
             this.casesDetailService = casesDetailService;
             this.usuarioService = usuarioService;
+            this.flujoService = flujoService;
         }
         [HttpGet("indicators")]
         public async Task<IActionResult> GetIndicators([FromHeader] string Authorization)
@@ -91,10 +93,36 @@ namespace ApiHandler.Controllers.Catalog
                 response.data = errors;
                 return Ok(response);
             }
+            Flujo? flujo = await flujoService.GetByIdAsync(casesRequest.flujoId);
+            if (flujo == null)
+            {
+                response.code = "400";
+                response.message = "Flujo no existente";
+                response.data = new { };
+                return Ok(response);
+            }
+
             response.code = "000";
-            response.message = "Detalle de campo";
+            response.message = "Creacion de expediente correcta";
             Expediente expediente = new Expediente();
-            expediente.Codigo = casesRequest.codigo;
+            expediente.ExpedienteRelacionadoId = 0;
+            if (flujo.FlujoAsociado)
+            {
+                if (casesRequest.expedienteRelacionadoId != 0)
+                {
+                    Expediente? expedienteRelacionado = await casesService.GetByIdAsync(casesRequest.expedienteRelacionadoId);
+                    if (expedienteRelacionado == null)
+                    {
+                        response.code = "400";
+                        response.message = "Expediente Relacionado no encontrado";
+                        response.data = new { };
+                        return Ok(response);
+                    }
+                    expediente.ExpedienteRelacionadoId = casesRequest.expedienteRelacionadoId;
+                }
+
+            }
+            expediente.Codigo = await casesLogic.GetCodeByFlujo(flujo);
             expediente.Nombre = casesRequest.nombre;
             expediente.Ubicacion = "";
             expediente.NombreArchivo = casesRequest.nombreArchivo;
@@ -106,10 +134,15 @@ namespace ApiHandler.Controllers.Catalog
             expediente.CampoValorJson = casesRequest.campos;
             expediente.RemitenteId = casesRequest.remitenteId;
             expediente.Asunto = casesRequest.asunto;
+            expediente.EtapaDetalleId = null;
             try
             {
                 await casesLogic.newCases(expediente, casesRequest.archivo, casesRequest.flujoId);
 
+                response.data = new
+                {
+                    expediente.Codigo
+                };
             }
             catch (Exception ex)
             {
@@ -142,7 +175,7 @@ namespace ApiHandler.Controllers.Catalog
                 return Ok(response);
             }
             response.code = "000";
-            response.message = "Detalle de campo";
+            response.message = "Edicion de expediente correcta";
             Expediente? expedienteOld = await casesService.GetByIdAsync(casesRequest.id);
             if (expedienteOld == null)
             {
@@ -153,11 +186,12 @@ namespace ApiHandler.Controllers.Catalog
             FollowCase followCase = new FollowCase
             {
                 etapaId = casesRequest.etapaId,
-                subEtapaId = casesRequest.subEtapaId,
+                subEtapaId = casesRequest.subEtapaId ?? null,
                 adjuntarArchivo = casesRequest.adjuntarArchivo,
                 nombreArchivo = casesRequest.nombreArchivo,
                 archivo = casesRequest.archivo,
                 asesor = casesRequest.asesor,
+                campos = casesRequest.campos
             };
             try
             {
@@ -245,9 +279,9 @@ namespace ApiHandler.Controllers.Catalog
                     response.message = "Expediente no puede cambiar de estado";
                     return Ok(response);
                 }
+                await casesLogic.newDetailForChangeStatus(expediente, casesRequest.state);
                 expediente.Estatus = casesRequest.state;
                 await casesService.EditAsync(expediente);
-                await casesLogic.newDetailForChangeStatus(expediente, casesRequest.state);
             }
             catch (Exception ex)
             {
@@ -317,7 +351,7 @@ namespace ApiHandler.Controllers.Catalog
                     RemitenteId = remitenteId,
                     Limit = limit
                 };
-                if (user.Perfil != "Administrador")
+                if (user.Perfil != "Administrador" && user.Perfil != "Recepcion")
                 {
                     filters.Usuario = user.Id;
                 }
@@ -393,11 +427,15 @@ namespace ApiHandler.Controllers.Catalog
                         expediente.RemitenteId,
                         Remitente = expediente.Remitente.Descripcion,
                         puedeCerrarse = expediente.Etapa.FinDeFlujo,
+                        puedeArchivarse = expediente.Etapa.Flujo.CierreArchivado,
+                        puedeDevolverseAlRemitente = expediente.Etapa.Flujo.CierreDevolucionAlRemitente,
+                        puedeEnviarAJudicial = expediente.Etapa.Flujo.CierreEnviadoAJudicial,
                         expediente.Asunto,
                         flujoId = expediente.Etapa != null ? expediente.Etapa.FlujoId : 0,
                         flujo = expediente.Etapa?.Flujo.Nombre,
                         etapa = expediente.Etapa?.Nombre,
                         etapaDetalle = expediente.EtapaDetalle?.Nombre,
+                        expedienteRelacionado = expediente.ExpedienteRelacionadoId != 0 ? expediente.ExpedienteRelacionado.Codigo : "",
                         cantidadDocumentos = await casesDetailService.CountByExpedienteIdAsync(expediente.Id),
                         asesor = expediente.Usuario != null ? $"{expediente.Usuario.Username}" : "",
                         miniatura = ThumbnailHelper.TryGetThumbnailBase64(expediente.Ubicacion, expediente.NombreArchivoHash)

@@ -40,6 +40,8 @@ namespace DBHandler.Models
         public int? EtapaDetalleId { get; set; }
         [ForeignKey("Usuario")]
         public int AsesorId { get; set; }
+        [ForeignKey("Expediente")]
+        public int? ExpedienteRelacionadoId { get; set; }
         [ForeignKey("Remitente")]
         public int RemitenteId { get; set; }
         [JsonIgnore]
@@ -50,6 +52,8 @@ namespace DBHandler.Models
         public virtual Usuario Usuario { get; set; } = null!;
         [JsonIgnore]
         public virtual Remitente Remitente { get; set; } = null!;
+        [JsonIgnore]
+        public virtual Expediente ExpedienteRelacionado { get; set; } = null!;
 
     }
 }

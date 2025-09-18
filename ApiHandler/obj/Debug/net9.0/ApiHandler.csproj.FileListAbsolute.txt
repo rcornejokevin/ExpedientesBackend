@@ -1,4 +1,5 @@
 /Users/kennycornejoguzman/workdir/GestionExpedientesBackend/ApiHandler/bin/Debug/net9.0/appsettings.json
+/Users/kennycornejoguzman/workdir/GestionExpedientesBackend/ApiHandler/bin/Debug/net9.0/appsettings_base.json
 /Users/kennycornejoguzman/workdir/GestionExpedientesBackend/ApiHandler/bin/Debug/net9.0/ApiHandler.staticwebassets.endpoints.json
 /Users/kennycornejoguzman/workdir/GestionExpedientesBackend/ApiHandler/bin/Debug/net9.0/ApiHandler
 /Users/kennycornejoguzman/workdir/GestionExpedientesBackend/ApiHandler/bin/Debug/net9.0/ApiHandler.deps.json

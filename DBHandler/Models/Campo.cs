@@ -32,6 +32,8 @@ namespace DBHandler.Models
         public bool Activo { get; set; } = true;
         [Required]
         public bool Requerido { get; set; } = true;
+        [Required]
+        public bool Editable { get; set; } = true;
         [ForeignKey("Flujo")]
         public int? FlujoId { get; set; }
         [JsonIgnore]

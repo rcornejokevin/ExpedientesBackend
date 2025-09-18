@@ -46,7 +46,20 @@ namespace DBHandler.Service.Catalog
 
             if (!string.IsNullOrWhiteSpace(filters.Estatus))
             {
-                query = query.Where(e => e.Estatus == filters.Estatus);
+                var statuses = filters.Estatus
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .Where(s => !string.IsNullOrWhiteSpace(s))
+                    .ToList();
+
+                if (statuses.Count == 1)
+                {
+                    var st = statuses[0];
+                    query = query.Where(e => e.Estatus == st);
+                }
+                else if (statuses.Count > 1)
+                {
+                    query = query.Where(e => statuses.Contains(e.Estatus));
+                }
             }
 
             if (!string.IsNullOrWhiteSpace(filters.Asunto))

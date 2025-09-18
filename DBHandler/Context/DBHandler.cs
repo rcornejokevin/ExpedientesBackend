@@ -6,7 +6,6 @@ namespace DBHandler.Context
 {
     public class DBHandlerContext : DbContext
     {
-        // Constructor adicional para usar directamente un string de conexión
         public DBHandlerContext(DbContextOptions<DBHandlerContext> options) : base(options) { }
 
         public DbSet<Usuario> Usuarios { get; set; }

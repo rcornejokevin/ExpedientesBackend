@@ -127,6 +127,7 @@ namespace ApiHandler.Controllers.Catalog
             campo.Label = campoRequest.label;
             campo.Placeholder = campoRequest.placeHolder;
             campo.Opciones = campoRequest.tipoCampo == "Opciones" ? campoRequest.opciones : "";
+            campo.Editable = campoRequest.editable;
             try
             {
                 await campoLogic.addCampo(campo);
@@ -192,6 +193,7 @@ namespace ApiHandler.Controllers.Catalog
             campo.Label = campoRequest.label;
             campo.Placeholder = campoRequest.placeHolder;
             campo.Opciones = campoRequest.tipoCampo == "Opciones" ? campoRequest.opciones : "";
+            campo.Editable = campoRequest.editable;
             try
             {
                 campo = await campoLogic.editCampo(campo);

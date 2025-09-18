@@ -36,7 +36,7 @@ public class LoginController : ControllerBase
                 return Ok(response);
             }
             Usuario? user = await authService.LoginSuccessAsync(request.username, request.password);
-            if (user == null)
+            if (user == null || (user != null && user.Operativo == false))
             {
                 response.code = "999";
                 response.message = "El usuario y la contraseña son incorrectos";
@@ -45,7 +45,7 @@ public class LoginController : ControllerBase
             var token = jwt.GenerateJwtToken(request.username);
             response.code = "000";
             response.message = "Login successful";
-            response.data = new { token.Token, token.Expire, user.Perfil };
+            response.data = new { token.Token, token.Expire, user?.Perfil };
             return Ok(response);
         }
         catch (Exception ex)

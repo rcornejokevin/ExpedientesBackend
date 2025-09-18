@@ -96,7 +96,9 @@ namespace ApiHandler.Controllers.Catalog
                 response.data = errors;
                 return Ok(response);
             }
-            Flujo flujo = new Flujo(0, flujoRequest.nombre, flujoRequest.detalle, true);
+            Flujo flujo = new Flujo(0, flujoRequest.nombre, flujoRequest.correlativo, flujoRequest.detalle, true,
+            flujoRequest.cierreArchivado, flujoRequest.cierreDevolucionAlRemitente,
+            flujoRequest.cierreEnviadoAJudicial, flujoRequest.flujoAsociado);
             try
             {
                 flujo = await flujoService.AddAsync(flujo);
@@ -143,7 +145,12 @@ namespace ApiHandler.Controllers.Catalog
                 return Ok(response);
             }
             flujo.Nombre = flujoRequest.nombre;
+            flujo.Correlativo = flujoRequest.correlativo;
             flujo.Detalle = flujoRequest.detalle;
+            flujo.CierreArchivado = flujoRequest.cierreArchivado;
+            flujo.CierreDevolucionAlRemitente = flujoRequest.cierreDevolucionAlRemitente;
+            flujo.CierreEnviadoAJudicial = flujoRequest.cierreEnviadoAJudicial;
+            flujo.FlujoAsociado = flujoRequest.flujoAsociado;
             try
             {
                 flujo = await flujoService.EditAsync(flujo);

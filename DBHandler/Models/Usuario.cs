@@ -27,6 +27,7 @@ namespace DBHandler.Models
         [Required]
         [MaxLength(50)]
         public string Perfil { get; set; } = null!;
+        public bool Operativo { get; set; } = true;
         public bool Activo { get; set; } = true;
     }
 }

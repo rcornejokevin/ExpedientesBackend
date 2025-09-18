@@ -1,0 +1,6 @@
+##AppSettings.json
+#Tools de Thumb
+ "Tools": {
+    "GhostscriptPath": "C:\\Program Files\\gs\\gs10.00.0\\bin\\gswin64c.exe",
+    "PdftoppmPath": "C:\\tools\\poppler\\bin\\pdftoppm.exe"
+  }

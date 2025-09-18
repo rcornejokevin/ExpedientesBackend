@@ -5,7 +5,6 @@ using DBHandler.Service.Catalog;
 using DBHandler.Service.Cases;
 using DBHandler.Service.Security;
 using BusinessLogic.Services;
-using DBHandler.Models;
 var builder = WebApplication.CreateBuilder(args);
 //Cors
 var localCors = "MyCors";
@@ -14,7 +13,7 @@ builder.Services.AddCors(opt =>
 {
     opt.AddPolicy(localCors, b =>
     {
-        b.WithOrigins("http://localhost:5173")   // EXACTO: esquema + host + puerto
+        b.WithOrigins("http://localhost:5173")
          .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
          .WithHeaders("Content-Type", "Authorization", "X-Requested-With", "X-CSRF-Token")
          .AllowCredentials(); // quítalo si NO usas cookies
@@ -52,7 +51,7 @@ builder.Services.AddScoped<CasesLogic>();
 builder.Services.AddScoped<CasesService>();
 builder.Services.AddScoped<CasesDetailService>();
 var app = builder.Build();
-
+app.UsePathBase("/app");
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
