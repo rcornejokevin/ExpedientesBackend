@@ -35,6 +35,12 @@ namespace DBHandler.Models
         public int ExpedienteId { get; set; }
         [JsonIgnore]
         public virtual Expediente Expediente { get; set; } = null!;
+        [JsonIgnore]
+        [ForeignKey(nameof(AsesorNuevorId))]
+        public virtual Usuario AsesorNuevo { get; set; } = null!;
+        [JsonIgnore]
+        [ForeignKey(nameof(AsesorAnteriorId))]
+        public virtual Usuario AsesorAnterior { get; set; } = null!;
         [ForeignKey(nameof(EtapaAnteriorId))]
         [JsonIgnore]
         public virtual Etapa? EtapaAnterior { get; set; }

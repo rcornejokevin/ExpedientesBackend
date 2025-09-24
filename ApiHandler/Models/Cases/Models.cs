@@ -26,6 +26,11 @@ namespace ApiHandler.Models.Cases
         [Required(ErrorMessage = "El id es requerido")]
         [Range(1, int.MaxValue, ErrorMessage = "El id es requerido")]
         public int id { get; set; }
+        public string nombre { get; set; } = String.Empty;
+        public DateTime fechaIngreso { get; set; }
+        public int remitenteId { get; set; }
+        public int expedienteRelacionadoId { get; set; }
+        public string asunto { get; set; } = String.Empty;
         [Required(ErrorMessage = "La etapa es requerida")]
         public int etapaId { get; set; }
         public int? subEtapaId { get; set; }
@@ -35,6 +40,14 @@ namespace ApiHandler.Models.Cases
         [Required(ErrorMessage = "El asesor es requerido")]
         public int asesor { get; set; }
         public string campos { get; set; } = String.Empty;
+    }
+    public class NewNoteRequest
+    {
+        [Required(ErrorMessage = "La nota es requerido")]
+        public string nota { get; set; } = String.Empty;
+        [Required(ErrorMessage = "El id es requerido")]
+        [Range(1, int.MaxValue, ErrorMessage = "El id es requerido")]
+        public int expedienteId { get; set; }
     }
     public class EditCaseStateRequest
     {

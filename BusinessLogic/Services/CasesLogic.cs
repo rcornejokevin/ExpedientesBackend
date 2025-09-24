@@ -17,8 +17,9 @@ namespace BusinessLogic.Services
         public CasesDetailService casesDetailService;
         public EtapaService etapaService;
         public EtapaDetalleService etapaDetalleService;
+        public CasesNoteService casesNoteService;
 
-        public CasesLogic(CasesService casesService, FileLogic fileLogic, IConfiguration configuration, CasesDetailService casesDetailService, EtapaService etapaService, EtapaDetalleService etapaDetalleService)
+        public CasesLogic(CasesService casesService, FileLogic fileLogic, IConfiguration configuration, CasesDetailService casesDetailService, EtapaService etapaService, EtapaDetalleService etapaDetalleService, CasesNoteService casesNoteService)
         {
             this.casesService = casesService;
             this.fileLogic = fileLogic;
@@ -26,6 +27,7 @@ namespace BusinessLogic.Services
             this.casesDetailService = casesDetailService;
             this.etapaService = etapaService;
             this.etapaDetalleService = etapaDetalleService;
+            this.casesNoteService = casesNoteService;
         }
         public async Task<string> GetCodeByFlujo(Flujo flujo)
         {
@@ -61,7 +63,7 @@ namespace BusinessLogic.Services
         }
         public bool userCanChangeState(string state, Usuario usuario)
         {
-            if (usuario.Perfil != "Administrador" && state == "Archivado") return false;
+            if (usuario.Perfil != "ADMINISTRADOR" && state == "Archivado") return false;
             return true;
         }
         public bool caseCanChangeState(Expediente expediente)
@@ -210,6 +212,14 @@ namespace BusinessLogic.Services
             await casesService.EditAsync(expediente);
             await newDetailCasesByCases(expediente, followCaseVar);
         }
+        public Boolean userCanChangeCase(Usuario user)
+        {
+            if (user.Perfil == "ADMINISTRADOR")
+            {
+                return true;
+            }
+            return false;
+        }
         public async Task<Boolean> checkCases(Expediente? oldExpediente, FollowCase followCase)
         {
             if (oldExpediente == null)
@@ -258,7 +268,15 @@ namespace BusinessLogic.Services
             return true;
 
         }
-
+        public async Task addNote(Expediente expediente, string note, Usuario usuario)
+        {
+            ExpedienteNotas nota = new ExpedienteNotas();
+            nota.AsesorId = usuario.Id;
+            nota.Nota = note;
+            nota.FechaIngreso = DateTime.Now;
+            nota.ExpedienteId = expediente.Id;
+            await casesNoteService.AddAsync(nota);
+        }
         public async Task<object> GetMonthlyIndicatorsForUser(Usuario user)
         {
             var now = DateTime.Now;
@@ -297,7 +315,6 @@ namespace BusinessLogic.Services
                 }
             }
 
-            // Serie por día del mes actual
             var daysInMonth = Enumerable.Range(0, (nextMonthStart - monthStart).Days)
                 .Select(offset => monthStart.AddDays(offset).Date)
                 .ToList();
@@ -320,7 +337,6 @@ namespace BusinessLogic.Services
                     .Count()
             }).ToList();
 
-            // Eventos del mes para pies (deduplicados por expediente)
             var assignedEvents = details
                 .Where(d => d.AsesorNuevorId == user.Id)
                 .Where(d => !string.IsNullOrWhiteSpace(d.EstatusNuevo) && d.EstatusNuevo.Trim().Equals("Abierto", StringComparison.OrdinalIgnoreCase))

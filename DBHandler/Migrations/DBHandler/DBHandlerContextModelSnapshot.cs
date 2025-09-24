@@ -285,6 +285,10 @@ namespace DBHandler.Migrations.DBHandler
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AsesorAnteriorId");
+
+                    b.HasIndex("AsesorNuevorId");
+
                     b.HasIndex("EtapaAnteriorId");
 
                     b.HasIndex("EtapaDetalleAnteriorId");
@@ -296,6 +300,37 @@ namespace DBHandler.Migrations.DBHandler
                     b.HasIndex("ExpedienteId");
 
                     b.ToTable("EXPEDIENTE_DETALLES", (string)null);
+                });
+
+            modelBuilder.Entity("DBHandler.Models.ExpedienteNotas", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NUMBER(10)");
+
+                    OraclePropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("AsesorId")
+                        .HasColumnType("NUMBER(10)");
+
+                    b.Property<int>("ExpedienteId")
+                        .HasColumnType("NUMBER(10)");
+
+                    b.Property<DateTime>("FechaIngreso")
+                        .HasColumnType("TIMESTAMP(7)");
+
+                    b.Property<string>("Nota")
+                        .HasColumnType("CLOB");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AsesorId");
+
+                    b.HasIndex("ExpedienteId");
+
+                    b.HasIndex("FechaIngreso");
+
+                    b.ToTable("EXPEDIENTE_NOTAS", (string)null);
                 });
 
             modelBuilder.Entity("DBHandler.Models.Flujo", b =>
@@ -476,6 +511,16 @@ namespace DBHandler.Migrations.DBHandler
 
             modelBuilder.Entity("DBHandler.Models.ExpedienteDetalle", b =>
                 {
+                    b.HasOne("DBHandler.Models.Usuario", "AsesorAnterior")
+                        .WithMany()
+                        .HasForeignKey("AsesorAnteriorId");
+
+                    b.HasOne("DBHandler.Models.Usuario", "AsesorNuevo")
+                        .WithMany()
+                        .HasForeignKey("AsesorNuevorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("DBHandler.Models.Etapa", "EtapaAnterior")
                         .WithMany()
                         .HasForeignKey("EtapaAnteriorId");
@@ -500,6 +545,10 @@ namespace DBHandler.Migrations.DBHandler
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("AsesorAnterior");
+
+                    b.Navigation("AsesorNuevo");
+
                     b.Navigation("EtapaAnterior");
 
                     b.Navigation("EtapaDetalleAnterior");
@@ -509,6 +558,15 @@ namespace DBHandler.Migrations.DBHandler
                     b.Navigation("EtapaNueva");
 
                     b.Navigation("Expediente");
+                });
+
+            modelBuilder.Entity("DBHandler.Models.ExpedienteNotas", b =>
+                {
+                    b.HasOne("DBHandler.Models.Usuario", "Asesor")
+                        .WithMany()
+                        .HasForeignKey("AsesorId");
+
+                    b.Navigation("Asesor");
                 });
 
             modelBuilder.Entity("DBHandler.Models.Etapa", b =>

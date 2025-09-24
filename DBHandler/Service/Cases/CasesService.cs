@@ -21,7 +21,16 @@ namespace DBHandler.Service.Catalog
 
             query = query.Where(e => e.Activo);
 
-            if (filters.Usuario.HasValue && filters.Usuario.Value > 0)
+            if (filters.UsuarioAsesor.HasValue && filters.UsuarioAsesor.Value > 0)
+            {
+                var asesorId = filters.UsuarioAsesor.Value;
+                query = query.Where(e =>
+                    e.AsesorId == asesorId ||
+                    (e.ExpedienteRelacionadoId.HasValue && e.ExpedienteRelacionadoId.Value > 0 &&
+                        _context.Expedientes.Any(parent => parent.Id == e.ExpedienteRelacionadoId && parent.AsesorId == asesorId)) ||
+                    _context.Expedientes.Any(child => child.ExpedienteRelacionadoId == e.Id && child.AsesorId == asesorId));
+            }
+            else if (filters.Usuario.HasValue && filters.Usuario.Value > 0)
             {
                 query = query.Where(e => e.AsesorId == filters.Usuario.Value);
             }
@@ -111,6 +120,7 @@ namespace DBHandler.Service.Catalog
                 .Include(e => e.EtapaDetalle)
                 .Include(e => e.Usuario)
                 .Include(e => e.Remitente)
+                .Include(e => e.ExpedienteRelacionado)
                 .AsQueryable();
 
             query = query.OrderByDescending(e => e.FechaActualizacion ?? e.FechaIngreso);

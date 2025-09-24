@@ -21,8 +21,10 @@ namespace ApiHandler.Controllers.Catalog
         public CasesDetailService casesDetailService;
         public FlujoService flujoService;
         public UsuarioService usuarioService;
+        public CasesNoteService casesNoteService;
         [ActivatorUtilitiesConstructor]
-        public CasesController(Jwt jwt, CasesLogic casesLogic, CasesService casesService, CasesDetailService casesDetailService, UsuarioService usuarioService, FlujoService flujoService)
+        public CasesController(Jwt jwt, CasesLogic casesLogic, CasesService casesService, CasesDetailService casesDetailService, UsuarioService usuarioService, FlujoService flujoService,
+        CasesNoteService casesNoteService)
         {
             this.jwt = jwt;
             this.casesLogic = casesLogic;
@@ -30,6 +32,7 @@ namespace ApiHandler.Controllers.Catalog
             this.casesDetailService = casesDetailService;
             this.usuarioService = usuarioService;
             this.flujoService = flujoService;
+            this.casesNoteService = casesNoteService;
         }
         [HttpGet("indicators")]
         public async Task<IActionResult> GetIndicators([FromHeader] string Authorization)
@@ -174,6 +177,20 @@ namespace ApiHandler.Controllers.Catalog
                 response.data = errors;
                 return Ok(response);
             }
+            string? username = jwt.GetUsernameFromAuthorization(Authorization);
+            if (string.IsNullOrWhiteSpace(username))
+            {
+                response.code = "401";
+                response.message = "Unauthorized";
+                return Ok(response);
+            }
+            Usuario user = await usuarioService.getUsuarioByUsername(username) ?? new Usuario();
+            if (user.Id == 0)
+            {
+                response.code = "401";
+                response.message = "Unauthorized";
+                return Ok(response);
+            }
             response.code = "000";
             response.message = "Edicion de expediente correcta";
             Expediente? expedienteOld = await casesService.GetByIdAsync(casesRequest.id);
@@ -193,6 +210,14 @@ namespace ApiHandler.Controllers.Catalog
                 asesor = casesRequest.asesor,
                 campos = casesRequest.campos
             };
+            if (casesLogic.userCanChangeCase(user))
+            {
+                expedienteOld.Asunto = string.IsNullOrEmpty(casesRequest.asunto) ? expedienteOld.Asunto : casesRequest.asunto;
+                expedienteOld.Nombre = string.IsNullOrEmpty(casesRequest.nombre) ? expedienteOld.Nombre : casesRequest.nombre;
+                expedienteOld.FechaIngreso = casesRequest.fechaIngreso;
+                expedienteOld.RemitenteId = casesRequest.remitenteId;
+                expedienteOld.ExpedienteRelacionadoId = casesRequest.expedienteRelacionadoId;
+            }
             try
             {
                 await casesLogic.followCase(expedienteOld, followCase);
@@ -351,7 +376,11 @@ namespace ApiHandler.Controllers.Catalog
                     RemitenteId = remitenteId,
                     Limit = limit
                 };
-                if (user.Perfil != "Administrador" && user.Perfil != "Recepcion")
+                if (user.Perfil == "ASESOR")
+                {
+                    filters.UsuarioAsesor = user.Id;
+                }
+                else if (user.Perfil != "ADMINISTRADOR" && user.Perfil != "RECEPCIÓN")
                 {
                     filters.Usuario = user.Id;
                 }
@@ -438,7 +467,9 @@ namespace ApiHandler.Controllers.Catalog
                         expedienteRelacionado = expediente.ExpedienteRelacionadoId != 0 ? expediente.ExpedienteRelacionado.Codigo : "",
                         cantidadDocumentos = await casesDetailService.CountByExpedienteIdAsync(expediente.Id),
                         asesor = expediente.Usuario != null ? $"{expediente.Usuario.Username}" : "",
-                        miniatura = ThumbnailHelper.TryGetThumbnailBase64(expediente.Ubicacion, expediente.NombreArchivoHash)
+                        miniatura = ThumbnailHelper.TryGetThumbnailBase64(expediente.Ubicacion, expediente.NombreArchivoHash),
+                        puedeRelacionarse = expediente.Etapa?.Flujo.FlujoAsociado,
+                        expedienteRelacionadoId = expediente.ExpedienteRelacionadoId,
                     };
                 }
                 else
@@ -518,6 +549,7 @@ namespace ApiHandler.Controllers.Catalog
                         d.EtapaDetalleNuevaId,
                         d.AsesorAnteriorId,
                         d.AsesorNuevorId,
+                        asesorNuevo = d.AsesorNuevo.Username,
                         etapa = d.EtapaNueva.Nombre,
                         subEtapa = d.EtapaDetalleNuevaId != null ? d.EtapaDetalleNueva?.Nombre : "",
                         miniatura = ThumbnailHelper.TryGetThumbnailBase64(d.Ubicacion ?? string.Empty, d.NombreArchivoHash ?? string.Empty),
@@ -550,6 +582,105 @@ namespace ApiHandler.Controllers.Catalog
             {
                 ExpedienteDetalle? expedienteDetalle = await casesDetailService.GetByIdAsync(id);
                 response.data = expedienteDetalle;
+            }
+            catch (Exception ex)
+            {
+                response.code = "500";
+                response.message = ex.Message;
+                response.data = ex.StackTrace;
+                return Ok(response);
+            }
+            return Ok(response);
+        }
+        [HttpPost("note")]
+        public async Task<IActionResult> addNoteElement([FromHeader] string Authorization, [FromBody] NewNoteRequest casesRequest)
+        {
+            ResponseApi response = new ResponseApi();
+            if (!jwt.ValidateJwtToken(Authorization))
+            {
+                response.code = "401";
+                response.message = "Unauthorized";
+                return Ok(response);
+            }
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => string.IsNullOrWhiteSpace(e.ErrorMessage) ? e.Exception?.Message ?? "Solicitud inválida" : e.ErrorMessage)
+                    .ToList();
+                response.code = "400";
+                response.message = errors.FirstOrDefault() ?? "Solicitud inválida";
+                response.data = errors;
+                return Ok(response);
+            }
+            string? username = jwt.GetUsernameFromAuthorization(Authorization);
+            if (username == null)
+            {
+                response.code = "401";
+                response.message = "Unauthorized";
+                return Ok(response);
+            }
+            Usuario user = await usuarioService.getUsuarioByUsername(username) ?? new Usuario();
+            if (user.Id == 0)
+            {
+                response.code = "401";
+                response.message = "Unauthorized";
+                return Ok(response);
+            }
+            Expediente? expediente = await casesService.GetByIdAsync(casesRequest.expedienteId);
+            if (expediente == null)
+            {
+                response.code = "404";
+                response.message = "Expediente no encontrado";
+                return Ok(response);
+            }
+            response.code = "000";
+            response.message = "Nueva Nota agregada";
+            try
+            {
+                await casesLogic.addNote(expediente, casesRequest.nota, user);
+            }
+            catch (Exception ex)
+            {
+                response.code = "500";
+                response.message = ex.Message;
+                return Ok(response);
+            }
+            return Ok(response);
+
+        }
+        [HttpGet("notes/{id}")]
+        public async Task<IActionResult> GetNotes([FromHeader] string Authorization, int id)
+        {
+            ResponseApi response = new ResponseApi();
+            if (!jwt.ValidateJwtToken(Authorization))
+            {
+                response.code = "401";
+                response.message = "Unauthorized";
+                return Ok(response);
+            }
+            response.code = "000";
+            response.message = "Expediente";
+            try
+            {
+                Expediente? expediente = await casesService.GetByIdAsync(id);
+                if (expediente == null)
+                {
+                    response.code = "404";
+                    response.message = "Expediente no encontrado";
+                    return Ok(response);
+                }
+                List<ExpedienteNotas> notas = await casesNoteService.GetAllByExpedienteAsync(expediente);
+                response.data = notas
+                    .OrderBy(d => d.FechaIngreso)
+                    .Select(d => new
+                    {
+                        d.Id,
+                        asesor = d.Asesor.Username,
+                        d.FechaIngreso,
+                        d.Nota
+                    })
+                    .ToList();
             }
             catch (Exception ex)
             {

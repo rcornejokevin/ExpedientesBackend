@@ -50,6 +50,7 @@ builder.Services.AddScoped<FileLogic>();
 builder.Services.AddScoped<CasesLogic>();
 builder.Services.AddScoped<CasesService>();
 builder.Services.AddScoped<CasesDetailService>();
+builder.Services.AddScoped<CasesNoteService>();
 var app = builder.Build();
 app.UsePathBase("/app");
 if (app.Environment.IsDevelopment())

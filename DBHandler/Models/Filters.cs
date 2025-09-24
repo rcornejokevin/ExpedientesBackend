@@ -25,5 +25,6 @@ namespace DBHandler.Models
 
         public int? RemitenteId { get; set; }
         public int? Usuario { get; set; }
+        public int? UsuarioAsesor { get; set; }
     }
 }
