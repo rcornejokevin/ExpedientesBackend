@@ -29,10 +29,13 @@ namespace DBHandler.Models
         [Required]
         public string Tipo { get; set; } = String.Empty;
         [Required]
+        [Column(TypeName = "NUMBER(1)")]
         public bool Activo { get; set; } = true;
         [Required]
+        [Column(TypeName = "NUMBER(1)")]
         public bool Requerido { get; set; } = true;
         [Required]
+        [Column(TypeName = "NUMBER(1)")]
         public bool Editable { get; set; } = true;
         [ForeignKey("Flujo")]
         public int? FlujoId { get; set; }

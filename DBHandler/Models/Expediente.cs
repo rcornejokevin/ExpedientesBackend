@@ -27,7 +27,8 @@ namespace DBHandler.Models
         public DateTime? FechaActualizacion { get; set; }
 
         [Required]
-        public bool Activo { get; set; }
+        [Column(TypeName = "NUMBER(1)")]
+        public bool Activo { get; set; } = true;
         public string? Ubicacion { get; set; }
         [Column(TypeName = "CLOB")]
         public string? CampoValorJson { get; set; }

@@ -31,7 +31,13 @@ namespace ApiHandler.Controllers.Catalog
             response.message = "Listado de remitentes";
             try
             {
-                response.data = await remitenteService.GetAllAsync();
+                var remitentes = await remitenteService.GetAllAsync();
+                response.data = remitentes.Select(r => new
+                {
+                    id = r.Id,
+                    descripcion = r.Descripcion,
+                    activo = r.Activo
+                });
             }
             catch (Exception ex)
             {
@@ -191,7 +197,12 @@ namespace ApiHandler.Controllers.Catalog
                     response.message = "Remitente no encontrado";
                     return Ok(response);
                 }
-                response.data = remitente;
+                response.data = new
+                {
+                    id = remitente.Id,
+                    descripcion = remitente.Descripcion,
+                    activo = remitente.Activo
+                };
             }
             catch (Exception ex)
             {

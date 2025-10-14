@@ -48,7 +48,21 @@ namespace ApiHandler.Controllers.Catalog
                     response.message = "Campo no encontrado";
                     return Ok(response);
                 }
-                response.data = campo;
+                response.data = new
+                {
+                    id = campo.Id,
+                    nombre = campo.Nombre,
+                    label = campo.Label,
+                    placeHolder = campo.Placeholder,
+                    opciones = campo.Opciones,
+                    orden = campo.Orden,
+                    tipoCampo = campo.Tipo,
+                    flujoId = campo.FlujoId,
+                    etapaId = campo.EtapaId,
+                    requerido = campo.Requerido,
+                    editable = campo.Editable,
+                    activo = campo.Activo
+                };
             }
             catch (Exception ex)
             {

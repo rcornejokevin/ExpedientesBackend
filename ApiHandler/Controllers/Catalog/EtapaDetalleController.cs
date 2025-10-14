@@ -33,7 +33,17 @@ namespace ApiHandler.Controllers.Catalog
             response.message = "Listado de etapas";
             try
             {
-                response.data = await etapaDetalleService.GetAllAsync();
+                var etapaDetalles = await etapaDetalleService.GetAllAsync();
+                response.data = etapaDetalles.Select(ed => new
+                {
+                    id = ed.Id,
+                    nombre = ed.Nombre,
+                    orden = ed.Orden,
+                    detalle = ed.Detalle,
+                    etapaId = ed.EtapaId,
+                    etapaNombre = ed.Etapa.Nombre,
+                    activo = ed.Activo
+                }).OrderBy(o => o.orden).ToList();
             }
             catch (Exception ex)
             {
@@ -241,7 +251,16 @@ namespace ApiHandler.Controllers.Catalog
                     response.message = "Etapa detalle no encontrada";
                     return Ok(response);
                 }
-                response.data = etapaDetalle;
+                response.data = new
+                {
+                    id = etapaDetalle.Id,
+                    nombre = etapaDetalle.Nombre,
+                    orden = etapaDetalle.Orden,
+                    detalle = etapaDetalle.Detalle,
+                    etapaId = etapaDetalle.EtapaId,
+                    etapaNombre = etapaDetalle.Etapa.Nombre,
+                    activo = etapaDetalle.Activo
+                };
             }
             catch (Exception ex)
             {

@@ -55,20 +55,20 @@ namespace DBHandler.Service.Security
         public async Task<List<Usuario>> GetAllAsync()
         {
             return await _dbContext.Usuarios
-                .Where(u => u.Activo)
+                .Where(u => u.Activo == true)
                 .ToListAsync();
         }
         public async Task<Usuario?> getUsuarioByUsername(string? username)
         {
             return await _dbContext.Usuarios
-                 .Where(u => u.Activo)
+                 .Where(u => u.Activo == true)
                  .Where(u => u.Username == username)
                 .FirstOrDefaultAsync();
         }
         public async Task<Usuario?> getUsuarioByIdAsync(int? id)
         {
             return await _dbContext.Usuarios
-                 .Where(u => u.Activo)
+                 .Where(u => u.Activo == true)
                  .Where(u => u.Id == id)
                 .FirstOrDefaultAsync();
         }

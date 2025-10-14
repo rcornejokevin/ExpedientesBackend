@@ -1,6 +1,7 @@
 
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using DBHandler.Models;
 namespace DBHandler.Context
 {

@@ -31,7 +31,15 @@ namespace ApiHandler.Controllers.Security
             response.message = "Listado de usuarios";
             try
             {
-                response.data = await usuarioService.GetAllAsync();
+                var usuarios = await usuarioService.GetAllAsync();
+                response.data = usuarios.Select(u => new
+                {
+                    id = u.Id,
+                    username = u.Username,
+                    perfil = u.Perfil,
+                    operativo = u.Operativo,
+                    activo = u.Activo
+                });
             }
             catch (Exception ex)
             {
@@ -191,7 +199,14 @@ namespace ApiHandler.Controllers.Security
                     response.message = "Usuario no encontrado";
                     return Ok(response);
                 }
-                response.data = usuario;
+                response.data = new
+                {
+                    id = usuario.Id,
+                    username = usuario.Username,
+                    perfil = usuario.Perfil,
+                    operativo = usuario.Operativo,
+                    activo = usuario.Activo
+                };
             }
             catch (Exception ex)
             {

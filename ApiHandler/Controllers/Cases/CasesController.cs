@@ -108,7 +108,7 @@ namespace ApiHandler.Controllers.Catalog
             response.code = "000";
             response.message = "Creacion de expediente correcta";
             Expediente expediente = new Expediente();
-            expediente.ExpedienteRelacionadoId = 0;
+            expediente.ExpedienteRelacionadoId = null;
             if (flujo.FlujoAsociado)
             {
                 if (casesRequest.expedienteRelacionadoId != 0)
@@ -216,7 +216,7 @@ namespace ApiHandler.Controllers.Catalog
                 expedienteOld.Nombre = string.IsNullOrEmpty(casesRequest.nombre) ? expedienteOld.Nombre : casesRequest.nombre;
                 expedienteOld.FechaIngreso = casesRequest.fechaIngreso;
                 expedienteOld.RemitenteId = casesRequest.remitenteId;
-                expedienteOld.ExpedienteRelacionadoId = casesRequest.expedienteRelacionadoId;
+                expedienteOld.ExpedienteRelacionadoId = casesRequest.expedienteRelacionadoId == 0 ? null : casesRequest.expedienteRelacionadoId;
             }
             try
             {
@@ -464,7 +464,7 @@ namespace ApiHandler.Controllers.Catalog
                         flujo = expediente.Etapa?.Flujo.Nombre,
                         etapa = expediente.Etapa?.Nombre,
                         etapaDetalle = expediente.EtapaDetalle?.Nombre,
-                        expedienteRelacionado = expediente.ExpedienteRelacionadoId != 0 ? expediente.ExpedienteRelacionado.Codigo : "",
+                        expedienteRelacionado = expediente.ExpedienteRelacionadoId != null ? expediente.ExpedienteRelacionado.Codigo : "",
                         cantidadDocumentos = await casesDetailService.CountByExpedienteIdAsync(expediente.Id),
                         asesor = expediente.Usuario != null ? $"{expediente.Usuario.Username}" : "",
                         miniatura = ThumbnailHelper.TryGetThumbnailBase64(expediente.Ubicacion, expediente.NombreArchivoHash),

@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using DBHandler.Context;
 using DBHandler.Models;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace DBHandler.Service.Security
 {
@@ -19,9 +21,18 @@ namespace DBHandler.Service.Security
 
         public async Task<UsuariosNida?> ExternalLoginAsync(string? username, string? password)
         {
+            if (string.IsNullOrWhiteSpace(username) || string.IsNullOrEmpty(password))
+            {
+                return null;
+            }
+
+            string passwordHash = ComputeMd5Hash(password);
+            string passwordHashLower = passwordHash.ToLowerInvariant();
+
             return await dbContextLogin.UsuariosNidas.FirstOrDefaultAsync(
-                u => u.NombreUsuario == username && u.Clave == password
-                );
+                u => u.NombreUsuario == username &&
+                     (u.Clave == passwordHash || u.Clave == passwordHashLower)
+            );
         }
 
         public async Task<Usuario?> LoginSuccessAsync(string? username, string? password)
@@ -36,6 +47,13 @@ namespace DBHandler.Service.Security
                 return null;
             }
             return usuarioLogin;
+        }
+
+        private static string ComputeMd5Hash(string value)
+        {
+            using MD5 md5 = MD5.Create();
+            byte[] hashBytes = md5.ComputeHash(Encoding.UTF8.GetBytes(value));
+            return Convert.ToHexString(hashBytes);
         }
     }
 }

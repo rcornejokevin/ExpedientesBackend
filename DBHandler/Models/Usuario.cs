@@ -27,7 +27,11 @@ namespace DBHandler.Models
         [Required]
         [MaxLength(50)]
         public string Perfil { get; set; } = null!;
+        [Required]
+        [Column(TypeName = "NUMBER(1)")]
         public bool Operativo { get; set; } = true;
+        [Required]
+        [Column(TypeName = "NUMBER(1)")]
         public bool Activo { get; set; } = true;
     }
 }

@@ -38,7 +38,18 @@ namespace ApiHandler.Controllers.Catalog
                     response.message = "Flujo no encontrado";
                     return Ok(response);
                 }
-                response.data = flujo;
+                response.data = new
+                {
+                    id = flujo.Id,
+                    nombre = flujo.Nombre,
+                    correlativo = flujo.Correlativo,
+                    detalle = flujo.Detalle,
+                    cierreArchivado = flujo.CierreArchivado,
+                    cierreDevolucionAlRemitente = flujo.CierreDevolucionAlRemitente,
+                    cierreEnviadoAJudicial = flujo.CierreEnviadoAJudicial,
+                    flujoAsociado = flujo.FlujoAsociado,
+                    activo = flujo.Activo
+                };
             }
             catch (Exception ex)
             {
@@ -63,7 +74,19 @@ namespace ApiHandler.Controllers.Catalog
             response.message = "Listado de flujos";
             try
             {
-                response.data = await flujoService.GetAllAsync();
+                var flujos = await flujoService.GetAllAsync();
+                response.data = flujos.Select(flujo => new
+                {
+                    id = flujo.Id,
+                    nombre = flujo.Nombre,
+                    correlativo = flujo.Correlativo,
+                    detalle = flujo.Detalle,
+                    cierreArchivado = flujo.CierreArchivado,
+                    cierreDevolucionAlRemitente = flujo.CierreDevolucionAlRemitente,
+                    cierreEnviadoAJudicial = flujo.CierreEnviadoAJudicial,
+                    flujoAsociado = flujo.FlujoAsociado,
+                    activo = flujo.Activo
+                });
             }
             catch (Exception ex)
             {

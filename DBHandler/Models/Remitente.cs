@@ -22,6 +22,8 @@ namespace DBHandler.Models
         [Required]
         [MaxLength(100)]
         public string Descripcion { get; set; } = string.Empty;
+        [Required]
+        [Column(TypeName = "NUMBER(1)")]
         public bool Activo { get; set; } = true;
     }
 }

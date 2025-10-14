@@ -13,10 +13,11 @@ builder.Services.AddCors(opt =>
 {
     opt.AddPolicy(localCors, b =>
     {
-        b.WithOrigins("http://localhost:5173")
+        b.WithOrigins("https://preprod-sideju-fe.marn.gob.gt",
+                      "http://localhost:5173")
          .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
          .WithHeaders("Content-Type", "Authorization", "X-Requested-With", "X-CSRF-Token")
-         .AllowCredentials(); // quítalo si NO usas cookies
+         .AllowCredentials();
     });
 });
 

@@ -33,14 +33,19 @@ namespace DBHandler.Models
         public string Correlativo { get; set; } = String.Empty;
         public string? Detalle { get; set; }
         [Required]
+        [Column(TypeName = "NUMBER(1)")]
         public bool Activo { get; set; } = true;
         [Required]
+        [Column(TypeName = "NUMBER(1)")]
         public bool CierreArchivado { get; set; } = true;
         [Required]
+        [Column(TypeName = "NUMBER(1)")]
         public bool CierreDevolucionAlRemitente { get; set; } = true;
         [Required]
+        [Column(TypeName = "NUMBER(1)")]
         public bool CierreEnviadoAJudicial { get; set; } = true;
         [Required]
+        [Column(TypeName = "NUMBER(1)")]
         public bool FlujoAsociado { get; set; } = true;
         [JsonIgnore]
         public virtual ICollection<Etapa> Etapas { get; set; } = new List<Etapa>();
