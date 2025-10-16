@@ -464,7 +464,7 @@ namespace ApiHandler.Controllers.Catalog
                         flujo = expediente.Etapa?.Flujo.Nombre,
                         etapa = expediente.Etapa?.Nombre,
                         etapaDetalle = expediente.EtapaDetalle?.Nombre,
-                        expedienteRelacionado = expediente.ExpedienteRelacionadoId != null ? expediente.ExpedienteRelacionado.Codigo : "",
+                        expedienteRelacionado = (expediente.ExpedienteRelacionadoId != null && expediente.ExpedienteRelacionadoId != 0) ? expediente.ExpedienteRelacionado.Codigo : "",
                         cantidadDocumentos = await casesDetailService.CountByExpedienteIdAsync(expediente.Id),
                         asesor = expediente.Usuario != null ? $"{expediente.Usuario.Username}" : "",
                         miniatura = ThumbnailHelper.TryGetThumbnailBase64(expediente.Ubicacion, expediente.NombreArchivoHash),
