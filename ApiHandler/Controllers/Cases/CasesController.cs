@@ -330,6 +330,7 @@ namespace ApiHandler.Controllers.Catalog
          int? asesorId = 0,
          int? flujoId = 0,
          int? etapaId = 0,
+         int? reporteId = 0,
          int? subEtapaId = 0,
          string? estatus = "",
          string? asunto = "",
@@ -380,7 +381,7 @@ namespace ApiHandler.Controllers.Catalog
                 {
                     filters.UsuarioAsesor = user.Id;
                 }
-                else if (user.Perfil != "ADMINISTRADOR" && user.Perfil != "RECEPCIÓN")
+                else if (user.Perfil != "ADMINISTRADOR" && user.Perfil != "RECEPCIÓN" && (user.Perfil != "PROCURADOR" || reporteId != 1))
                 {
                     filters.Usuario = user.Id;
                 }

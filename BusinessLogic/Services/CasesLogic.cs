@@ -125,13 +125,17 @@ namespace BusinessLogic.Services
             ExpedienteDetalle expedienteDetalle = new ExpedienteDetalle();
             expedienteDetalle.ExpedienteId = expediente.Id;
             expedienteDetalle.Fecha = DateTime.UtcNow;
-            expedienteDetalle.Ubicacion = expediente.Ubicacion;
-            expedienteDetalle.NombreArchivo = expediente.NombreArchivo;
-            expedienteDetalle.NombreArchivoHash = expediente.NombreArchivoHash;
+
             expedienteDetalle.EstatusAnterior = expediente.Estatus;
             expedienteDetalle.EstatusNuevo = expediente.Estatus;
             if (followCase != null)
             {
+                if (!string.IsNullOrWhiteSpace(followCase.archivo))
+                {
+                    expedienteDetalle.Ubicacion = expediente.Ubicacion;
+                    expedienteDetalle.NombreArchivo = expediente.NombreArchivo;
+                    expedienteDetalle.NombreArchivoHash = expediente.NombreArchivoHash;
+                }
                 expedienteDetalle.EtapaAnteriorId = expediente.EtapaId;
                 expedienteDetalle.EtapaDetalleAnteriorId = expediente?.EtapaDetalleId == 0 ? null : expediente?.EtapaDetalleId;
                 expedienteDetalle.AsesorAnteriorId = expediente.AsesorId;
