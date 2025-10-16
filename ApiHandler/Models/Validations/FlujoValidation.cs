@@ -35,8 +35,11 @@ namespace ApiHandler.Models.Validations
                     }
                 }
             }
-
-            var existe = db.Flujos.Any(f => f.Nombre == nombre && f.Id != currentId);
+            var existe = db.Flujos.Any(f => f.Nombre == nombre);
+            if (currentId > 0)
+            {
+                existe = db.Flujos.Any(f => f.Nombre == nombre && f.Id != currentId);
+            }
             if (existe)
             {
                 return new ValidationResult(ErrorMessage ?? "El nombre ya existe, debe ser único.");

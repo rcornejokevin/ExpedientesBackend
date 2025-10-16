@@ -42,8 +42,8 @@ namespace ApiHandler.Controllers.Catalog
                     e.Orden,
                     e.Detalle,
                     e.FlujoId,
-                    e.FinDeFlujo,
-                    e.Activo
+                    FinDeFlujo = e.FinDeFlujo == 1 ? true : false,
+                    Activo = e.Activo == 1 ? true : false
                 });
             }
             catch (Exception ex)
@@ -80,11 +80,11 @@ namespace ApiHandler.Controllers.Catalog
             List<EtapaDb> listEtapaByFlujoId = await etapaService.GetAllByFlujoIdAsync(etapaRequest.flujoId);
             EtapaDb etapa = new EtapaDb();
             etapa.Nombre = etapaRequest.nombre;
-            etapa.Activo = true;
+            etapa.Activo = 1;
             etapa.Orden = listEtapaByFlujoId.Count() + 1;
             etapa.Detalle = etapaRequest.detalle;
             etapa.FlujoId = etapaRequest.flujoId;
-            etapa.FinDeFlujo = etapaRequest.finDeFlujo;
+            etapa.FinDeFlujo = etapaRequest.finDeFlujo ? 1 : 0;
             try
             {
                 etapa = await etapaService.AddAsync(etapa);
@@ -140,7 +140,7 @@ namespace ApiHandler.Controllers.Catalog
             etapa.Nombre = etapaRequest.nombre;
             etapa.Detalle = etapaRequest.detalle;
             etapa.FlujoId = etapaRequest.flujoId;
-            etapa.FinDeFlujo = etapaRequest.finDeFlujo;
+            etapa.FinDeFlujo = etapaRequest.finDeFlujo ? 1 : 0;
             try
             {
                 etapa = await etapaService.EditAsync(etapa);
@@ -217,7 +217,7 @@ namespace ApiHandler.Controllers.Catalog
                 response.message = "Etapa no encontrada";
                 return Ok(response);
             }
-            etapa.Activo = false;
+            etapa.Activo = 0;
             try
             {
                 etapa = await etapaService.EditAsync(etapa);
@@ -261,8 +261,8 @@ namespace ApiHandler.Controllers.Catalog
                     etapa.Orden,
                     etapa.Detalle,
                     etapa.FlujoId,
-                    etapa.FinDeFlujo,
-                    etapa.Activo
+                    FinDeFlujo = etapa.FinDeFlujo == 1 ? true : false,
+                    Activo = etapa.Activo == 1 ? true : false
                 };
             }
             catch (Exception ex)

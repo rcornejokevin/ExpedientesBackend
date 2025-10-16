@@ -4,3 +4,5 @@
     "GhostscriptPath": "C:\\Program Files\\gs\\gs10.00.0\\bin\\gswin64c.exe",
     "PdftoppmPath": "C:\\tools\\poppler\\bin\\pdftoppm.exe"
   }
+#Publicar Proyecto
+dotnet publish ApiHandler -c Release -o publish

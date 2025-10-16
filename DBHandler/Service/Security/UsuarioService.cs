@@ -40,7 +40,7 @@ namespace DBHandler.Service.Security
         }
         public async Task deleteAsync(Usuario usuario)
         {
-            usuario.Activo = false;
+            usuario.Activo = 0;
             _dbContext.Usuarios.Update(usuario);
             try
             {
@@ -55,20 +55,20 @@ namespace DBHandler.Service.Security
         public async Task<List<Usuario>> GetAllAsync()
         {
             return await _dbContext.Usuarios
-                .Where(u => u.Activo == true)
+                .Where(u => u.Activo == 1)
                 .ToListAsync();
         }
         public async Task<Usuario?> getUsuarioByUsername(string? username)
         {
             return await _dbContext.Usuarios
-                 .Where(u => u.Activo == true)
-                 .Where(u => u.Username == username)
+                .Where(u => u.Activo == 1)
+                .Where(u => u.Username == username)
                 .FirstOrDefaultAsync();
         }
         public async Task<Usuario?> getUsuarioByIdAsync(int? id)
         {
             return await _dbContext.Usuarios
-                 .Where(u => u.Activo == true)
+                 .Where(u => u.Activo == 1)
                  .Where(u => u.Id == id)
                 .FirstOrDefaultAsync();
         }

@@ -13,7 +13,7 @@ namespace DBHandler.Service.Catalog
         public async Task<List<Campo>> GetAllAsync()
         {
             return await _context.Campos
-                .Where(u => u.Activo)
+                .Where(u => u.Activo == 1)
                 .OrderBy(u => u.Orden)
                 .ToListAsync();
         }
@@ -21,7 +21,7 @@ namespace DBHandler.Service.Catalog
         {
             return await _context.Campos
                 .Where(u => u.Id == id)
-                .Where(u => u.Activo)
+                .Where(u => u.Activo == 1)
                 .FirstOrDefaultAsync();
         }
         public async Task<Campo> AddAsync(Campo campo)

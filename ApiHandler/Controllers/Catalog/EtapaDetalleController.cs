@@ -42,7 +42,7 @@ namespace ApiHandler.Controllers.Catalog
                     detalle = ed.Detalle,
                     etapaId = ed.EtapaId,
                     etapaNombre = ed.Etapa.Nombre,
-                    activo = ed.Activo
+                    activo = ed.Activo == 1 ? true : false
                 }).OrderBy(o => o.orden).ToList();
             }
             catch (Exception ex)
@@ -79,7 +79,7 @@ namespace ApiHandler.Controllers.Catalog
             response.message = "Etapa creada correctamente";
             EtapaDetalle etapaDetalle = new EtapaDetalle();
             etapaDetalle.EtapaId = etapaDetalleRequest.etapaId;
-            etapaDetalle.Activo = true;
+            etapaDetalle.Activo = 1;
             etapaDetalle.Orden = etapaDetalleRequest.orden;
             etapaDetalle.Nombre = etapaDetalleRequest.nombre;
             etapaDetalle.Detalle = etapaDetalleRequest.detalle;
@@ -127,7 +127,7 @@ namespace ApiHandler.Controllers.Catalog
                 return Ok(response);
             }
             etapaDetalle.EtapaId = etapaDetalleRequest.etapaId;
-            etapaDetalle.Activo = true;
+            etapaDetalle.Activo = 1;
             etapaDetalle.Orden = etapaDetalleRequest.orden;
             etapaDetalle.Nombre = etapaDetalleRequest.nombre;
             etapaDetalle.Detalle = etapaDetalleRequest.detalle;
@@ -214,7 +214,7 @@ namespace ApiHandler.Controllers.Catalog
                 response.message = "Flujo no encontrada";
                 return Ok(response);
             }
-            etapaDetalle.Activo = false;
+            etapaDetalle.Activo = 0;
             try
             {
                 await etapaDetalleService.EditAsync(etapaDetalle);
@@ -259,7 +259,7 @@ namespace ApiHandler.Controllers.Catalog
                     detalle = etapaDetalle.Detalle,
                     etapaId = etapaDetalle.EtapaId,
                     etapaNombre = etapaDetalle.Etapa.Nombre,
-                    activo = etapaDetalle.Activo
+                    activo = etapaDetalle.Activo == 1 ? true : false
                 };
             }
             catch (Exception ex)

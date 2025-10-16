@@ -19,8 +19,7 @@ namespace DBHandler.Models
         [Required]
         public int Orden { get; set; } = 0;
         [Required]
-        [Column(TypeName = "NUMBER(1)")]
-        public bool Activo { get; set; } = true;
+        public int Activo { get; set; } = 1;
         public string? Detalle { get; set; } = String.Empty;
         [ForeignKey("Etapa")]
         [Required]

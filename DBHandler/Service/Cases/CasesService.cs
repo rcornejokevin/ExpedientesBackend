@@ -19,7 +19,7 @@ namespace DBHandler.Service.Catalog
         {
             IQueryable<Expediente> query = _context.Expedientes.AsQueryable();
 
-            query = query.Where(e => e.Activo);
+            query = query.Where(e => e.Activo == 1);
 
             if (filters.UsuarioAsesor.HasValue && filters.UsuarioAsesor.Value > 0)
             {
@@ -135,7 +135,7 @@ namespace DBHandler.Service.Catalog
         public async Task<List<Expediente>> GetAllByUserAsync(Usuario user)
         {
             return await _context.Expedientes
-                .Where(u => u.Activo && u.AsesorId == user.Id)
+                .Where(u => u.Activo == 1 && u.AsesorId == user.Id)
                 .Include(e => e.Etapa)
                 .ToListAsync();
         }
@@ -143,7 +143,7 @@ namespace DBHandler.Service.Catalog
         {
             return await _context.Expedientes
                 .Where(u => u.Id == id)
-                .Where(u => u.Activo)
+                .Where(u => u.Activo == 1)
                 .Include(e => e.Etapa)
                 .FirstOrDefaultAsync();
         }

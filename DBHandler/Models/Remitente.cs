@@ -9,7 +9,7 @@ namespace DBHandler.Models
     public class Remitente
     {
         public Remitente() { }
-        public Remitente(int Id, string Descripcion, bool Activo)
+        public Remitente(int Id, string Descripcion, int Activo)
         {
             this.Id = Id;
             this.Descripcion = Descripcion;
@@ -23,7 +23,6 @@ namespace DBHandler.Models
         [MaxLength(100)]
         public string Descripcion { get; set; } = string.Empty;
         [Required]
-        [Column(TypeName = "NUMBER(1)")]
-        public bool Activo { get; set; } = true;
+        public int Activo { get; set; } = 1;
     }
 }

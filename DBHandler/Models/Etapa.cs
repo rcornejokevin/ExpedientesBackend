@@ -21,11 +21,9 @@ namespace DBHandler.Models
         public int Orden { get; set; } = 0;
         public string? Detalle { get; set; } = String.Empty;
         [Required]
-        [Column(TypeName = "NUMBER(1)")]
-        public bool Activo { get; set; } = true;
+        public int Activo { get; set; } = 1;
         [Required]
-        [Column(TypeName = "NUMBER(1)")]
-        public bool FinDeFlujo { get; set; } = false;
+        public int FinDeFlujo { get; set; } = 0;
         [ForeignKey("Flujo")]
         [Required]
         public int FlujoId { get; set; }

@@ -18,7 +18,7 @@ namespace DBHandler.Context
             var optionsBuilder = new DbContextOptionsBuilder<LoginDbContext>();
             optionsBuilder.UseOracle(connectionString);
 
-            return new LoginDbContext(optionsBuilder.Options);
+            return new LoginDbContext(optionsBuilder.Options, configuration);
         }
     }
 }

@@ -109,7 +109,7 @@ namespace ApiHandler.Controllers.Catalog
             response.message = "Creacion de expediente correcta";
             Expediente expediente = new Expediente();
             expediente.ExpedienteRelacionadoId = null;
-            if (flujo.FlujoAsociado)
+            if (flujo.FlujoAsociado == 1)
             {
                 if (casesRequest.expedienteRelacionadoId != 0)
                 {
@@ -133,7 +133,7 @@ namespace ApiHandler.Controllers.Catalog
             expediente.FechaActualizacion = DateTime.UtcNow;
             expediente.AsesorId = casesRequest.asesor;
             expediente.Estatus = "Abierto";
-            expediente.Activo = true;
+            expediente.Activo = 1;
             expediente.CampoValorJson = casesRequest.campos;
             expediente.RemitenteId = casesRequest.remitenteId;
             expediente.Asunto = casesRequest.asunto;
@@ -393,7 +393,7 @@ namespace ApiHandler.Controllers.Catalog
                     e.Estatus,
                     e.FechaIngreso,
                     e.FechaActualizacion,
-                    e.Activo,
+                    Activo = e.Activo == 1 ? true : false,
                     e.Ubicacion,
                     e.CampoValorJson,
                     e.NombreArchivo,
@@ -445,7 +445,7 @@ namespace ApiHandler.Controllers.Catalog
                         expediente.Estatus,
                         expediente.FechaIngreso,
                         expediente.FechaActualizacion,
-                        expediente.Activo,
+                        Activo = expediente.Activo == 1 ? true : false,
                         expediente.Ubicacion,
                         expediente.CampoValorJson,
                         expediente.NombreArchivo,
@@ -519,6 +519,38 @@ namespace ApiHandler.Controllers.Catalog
             }
             return Ok(response);
         }
+        [HttpGet("document_detail/{id}")]
+        public async Task<IActionResult> GetDocumentDetail([FromHeader] string Authorization, int id)
+        {
+            ResponseApi response = new ResponseApi();
+            if (!jwt.ValidateJwtToken(Authorization))
+            {
+                response.code = "401";
+                response.message = "Unauthorized";
+                return Ok(response);
+            }
+            response.code = "000";
+            response.message = "Expediente";
+            try
+            {
+                ExpedienteDetalle? expedienteDetalle = await casesDetailService.GetByIdAsync(id);
+                if (expedienteDetalle == null)
+                {
+                    response.code = "404";
+                    response.message = "Expediente no encontrado";
+                    return Ok(response);
+                }
+                response.data = casesLogic.GetDocumentDetail(expedienteDetalle);
+            }
+            catch (Exception ex)
+            {
+                response.code = "500";
+                response.message = ex.Message;
+                response.data = ex.StackTrace;
+                return Ok(response);
+            }
+            return Ok(response);
+        }
         [HttpGet("detail/{id}")]
         public async Task<IActionResult> getDetail([FromHeader] string Authorization, int id)
         {
@@ -552,7 +584,6 @@ namespace ApiHandler.Controllers.Catalog
                         asesorNuevo = d.AsesorNuevo.Username,
                         etapa = d.EtapaNueva.Nombre,
                         subEtapa = d.EtapaDetalleNuevaId != null ? d.EtapaDetalleNueva?.Nombre : "",
-                        miniatura = ThumbnailHelper.TryGetThumbnailBase64(d.Ubicacion ?? string.Empty, d.NombreArchivoHash ?? string.Empty),
                         Estatus = d.EstatusNuevo,
                     })
                     .ToList();

@@ -1,33 +1,33 @@
 version: "3.8"
-
 services:
-  oracle-db:
-    image: container-registry.oracle.com/database/free
-    container_name: oracle-db
+  oracle-db-19c:
+    image: doctorkirk/oracle-19c
+    container_name: oracle-db-19c
     ports:
       - "1521:1521"
       - "5500:5500"
     environment:
-      - ORACLE_PWD=MySecurePass123
-      - APP_USER=kenny
-      - APP_USER_PASSWORD=StrongPass456
+      ORACLE_PWD: MySecurePass123
+      ORACLE_SID: FREE
+      ORACLE_PDB: FREEPDB1
     volumes:
-      - oracle-data:/opt/oracle/oradata
+      - oracle-data-19c:/opt/oracle/oradata-19c
     restart: unless-stopped
-  oracle-db-marn:
-    image: container-registry.oracle.com/database/free
-    container_name: oracle-db-marn
+
+  oracle-db-marn-19c:
+    image: doctorkirk/oracle-19c
+    container_name: oracle-db-marn-19c
     ports:
       - "1522:1521"
       - "5501:5500"
     environment:
-      - ORACLE_PWD=MySecurePass567
-      - APP_USER=pao
-      - APP_USER_PASSWORD=StrongPass567
+      ORACLE_PWD: MySecurePass567
+      ORACLE_SID: FREE
+      ORACLE_PDB: FREEPDB1
     volumes:
-      - oracle-data-marn:/opt/oracle/oradata
+      - oracle-data-marn-19c:/opt/oracle/oradata-marn-19c
     restart: unless-stopped
 
 volumes:
-  oracle-data:
-  oracle-data-marn:
+  oracle-data-19c:
+  oracle-data-marn-19c:

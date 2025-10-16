@@ -44,11 +44,11 @@ namespace ApiHandler.Controllers.Catalog
                     nombre = flujo.Nombre,
                     correlativo = flujo.Correlativo,
                     detalle = flujo.Detalle,
-                    cierreArchivado = flujo.CierreArchivado,
-                    cierreDevolucionAlRemitente = flujo.CierreDevolucionAlRemitente,
-                    cierreEnviadoAJudicial = flujo.CierreEnviadoAJudicial,
-                    flujoAsociado = flujo.FlujoAsociado,
-                    activo = flujo.Activo
+                    cierreArchivado = flujo.CierreArchivado == 1 ? true : false,
+                    cierreDevolucionAlRemitente = flujo.CierreDevolucionAlRemitente == 1 ? true : false,
+                    cierreEnviadoAJudicial = flujo.CierreEnviadoAJudicial == 1 ? true : false,
+                    flujoAsociado = flujo.FlujoAsociado == 1 ? true : false,
+                    activo = flujo.Activo == 1 ? true : false
                 };
             }
             catch (Exception ex)
@@ -81,11 +81,11 @@ namespace ApiHandler.Controllers.Catalog
                     nombre = flujo.Nombre,
                     correlativo = flujo.Correlativo,
                     detalle = flujo.Detalle,
-                    cierreArchivado = flujo.CierreArchivado,
-                    cierreDevolucionAlRemitente = flujo.CierreDevolucionAlRemitente,
-                    cierreEnviadoAJudicial = flujo.CierreEnviadoAJudicial,
-                    flujoAsociado = flujo.FlujoAsociado,
-                    activo = flujo.Activo
+                    cierreArchivado = flujo.CierreArchivado == 1 ? true : false,
+                    cierreDevolucionAlRemitente = flujo.CierreDevolucionAlRemitente == 1 ? true : false,
+                    cierreEnviadoAJudicial = flujo.CierreEnviadoAJudicial == 1 ? true : false,
+                    flujoAsociado = flujo.FlujoAsociado == 1 ? true : false,
+                    activo = flujo.Activo == 1 ? true : false
                 });
             }
             catch (Exception ex)
@@ -119,9 +119,9 @@ namespace ApiHandler.Controllers.Catalog
                 response.data = errors;
                 return Ok(response);
             }
-            Flujo flujo = new Flujo(0, flujoRequest.nombre, flujoRequest.correlativo, flujoRequest.detalle, true,
-            flujoRequest.cierreArchivado, flujoRequest.cierreDevolucionAlRemitente,
-            flujoRequest.cierreEnviadoAJudicial, flujoRequest.flujoAsociado);
+            Flujo flujo = new Flujo(flujoRequest.nombre, flujoRequest.correlativo, flujoRequest.detalle, 1,
+            flujoRequest.cierreArchivado == true ? 1 : 0, flujoRequest.cierreDevolucionAlRemitente == true ? 1 : 0,
+            flujoRequest.cierreEnviadoAJudicial == true ? 1 : 0, flujoRequest.flujoAsociado == true ? 1 : 0);
             try
             {
                 flujo = await flujoService.AddAsync(flujo);
@@ -170,10 +170,10 @@ namespace ApiHandler.Controllers.Catalog
             flujo.Nombre = flujoRequest.nombre;
             flujo.Correlativo = flujoRequest.correlativo;
             flujo.Detalle = flujoRequest.detalle;
-            flujo.CierreArchivado = flujoRequest.cierreArchivado;
-            flujo.CierreDevolucionAlRemitente = flujoRequest.cierreDevolucionAlRemitente;
-            flujo.CierreEnviadoAJudicial = flujoRequest.cierreEnviadoAJudicial;
-            flujo.FlujoAsociado = flujoRequest.flujoAsociado;
+            flujo.CierreArchivado = flujoRequest.cierreArchivado ? 1 : 0;
+            flujo.CierreDevolucionAlRemitente = flujoRequest.cierreDevolucionAlRemitente ? 1 : 0;
+            flujo.CierreEnviadoAJudicial = flujoRequest.cierreEnviadoAJudicial ? 1 : 0;
+            flujo.FlujoAsociado = flujoRequest.flujoAsociado ? 1 : 0;
             try
             {
                 flujo = await flujoService.EditAsync(flujo);
@@ -207,7 +207,7 @@ namespace ApiHandler.Controllers.Catalog
                 response.message = "Flujo no encontrada";
                 return Ok(response);
             }
-            flujo.Activo = false;
+            flujo.Activo = 0;
             try
             {
                 flujo = await flujoService.EditAsync(flujo);

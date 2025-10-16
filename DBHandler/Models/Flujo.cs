@@ -10,11 +10,10 @@ namespace DBHandler.Models
     public class Flujo
     {
         public Flujo() { }
-        public Flujo(int Id, string Nombre, string Correlativo, string? Detalle,
-         bool Activo, bool CierreArchivado, bool CierreDevolucionAlRemitente,
-          bool CierreEnviadoAJudicial, bool FlujoAsociado)
+        public Flujo(string Nombre, string Correlativo, string? Detalle,
+         int Activo, int CierreArchivado, int CierreDevolucionAlRemitente,
+          int CierreEnviadoAJudicial, int FlujoAsociado)
         {
-            this.Id = Id;
             this.Nombre = Nombre.Trim();
             this.Correlativo = Correlativo;
             this.Detalle = Detalle ?? "".Trim();
@@ -33,20 +32,15 @@ namespace DBHandler.Models
         public string Correlativo { get; set; } = String.Empty;
         public string? Detalle { get; set; }
         [Required]
-        [Column(TypeName = "NUMBER(1)")]
-        public bool Activo { get; set; } = true;
+        public int Activo { get; set; } = 1;
         [Required]
-        [Column(TypeName = "NUMBER(1)")]
-        public bool CierreArchivado { get; set; } = true;
+        public int CierreArchivado { get; set; } = 1;
         [Required]
-        [Column(TypeName = "NUMBER(1)")]
-        public bool CierreDevolucionAlRemitente { get; set; } = true;
+        public int CierreDevolucionAlRemitente { get; set; } = 1;
         [Required]
-        [Column(TypeName = "NUMBER(1)")]
-        public bool CierreEnviadoAJudicial { get; set; } = true;
+        public int CierreEnviadoAJudicial { get; set; } = 1;
         [Required]
-        [Column(TypeName = "NUMBER(1)")]
-        public bool FlujoAsociado { get; set; } = true;
+        public int FlujoAsociado { get; set; } = 1;
         [JsonIgnore]
         public virtual ICollection<Etapa> Etapas { get; set; } = new List<Etapa>();
         [JsonIgnore]

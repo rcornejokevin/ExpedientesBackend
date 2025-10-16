@@ -17,7 +17,7 @@ namespace DBHandler.Service.Catalog
         public async Task<List<EtapaDetalle>> GetAllAsync()
         {
             return await dbContext.EtapaDetalles
-                .Where(u => u.Activo)
+                .Where(u => u.Activo == 1)
                 .OrderBy(u => u.Orden)
                 .ToListAsync();
         }
@@ -25,7 +25,7 @@ namespace DBHandler.Service.Catalog
         public async Task<List<EtapaDetalle>> GetAllByEtapaAsync(Etapa etapa)
         {
             return await dbContext.EtapaDetalles
-                .Where(u => u.Activo)
+                .Where(u => u.Activo == 1)
                 .Where(u => u.EtapaId == etapa.Id)
                 .ToListAsync();
         }
@@ -55,13 +55,13 @@ namespace DBHandler.Service.Catalog
         {
             return await dbContext.EtapaDetalles
                 .Where(u => u.Id == id)
-                .Where(u => u.Activo)
+                .Where(u => u.Activo == 1)
                 .FirstOrDefaultAsync();
         }
         public async Task<EtapaDetalle?> getFirstEtapaDetalleByEtapaId(int etapaId)
         {
             return await dbContext.EtapaDetalles
-                .Where(u => u.Activo)
+                .Where(u => u.Activo == 1)
                 .Where(u => u.EtapaId == etapaId)
                 .OrderBy(u => u.Orden)
                 .FirstOrDefaultAsync();

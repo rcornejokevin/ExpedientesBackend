@@ -32,10 +32,10 @@ namespace DBHandler.Models
         public DateTime? FechaCreacion { get; set; }
 
         [Column("CAMBIARCLAVE")]
-        public bool? CambiarClave { get; set; }
+        public int? CambiarClave { get; set; }
 
         [Column("BLOQUEADO")]
-        public bool? Bloqueado { get; set; }
+        public int? Bloqueado { get; set; }
 
         [Column("FIRMA")]
         public string? Firma { get; set; }

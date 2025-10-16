@@ -59,9 +59,9 @@ namespace ApiHandler.Controllers.Catalog
                     tipoCampo = campo.Tipo,
                     flujoId = campo.FlujoId,
                     etapaId = campo.EtapaId,
-                    requerido = campo.Requerido,
-                    editable = campo.Editable,
-                    activo = campo.Activo
+                    requerido = campo.Requerido == 1 ? true : false,
+                    editable = campo.Editable == 1 ? true : false,
+                    activo = campo.Activo == 1 ? true : false
                 };
             }
             catch (Exception ex)
@@ -98,7 +98,22 @@ namespace ApiHandler.Controllers.Catalog
             response.message = "Listado de campos";
             try
             {
-                response.data = await campoService.GetAllAsync();
+                var campos = await campoService.GetAllAsync();
+                response.data = campos.Where(c => c.Activo == 1).Select(c => new
+                {
+                    id = c.Id,
+                    nombre = c.Nombre,
+                    label = c.Label,
+                    placeHolder = c.Placeholder,
+                    opciones = c.Opciones,
+                    orden = c.Orden,
+                    tipoCampo = c.Tipo,
+                    flujoId = c.FlujoId,
+                    etapaId = c.EtapaId,
+                    requerido = c.Requerido == 1 ? true : false,
+                    editable = c.Editable == 1 ? true : false,
+                    activo = c.Activo == 1 ? true : false
+                }).OrderBy(c => c.orden);
             }
             catch (Exception ex)
             {
@@ -137,11 +152,11 @@ namespace ApiHandler.Controllers.Catalog
             campo.FlujoId = campoRequest.flujoId;
             campo.Tipo = campoRequest.tipoCampo;
             campo.Orden = campoRequest.orden;
-            campo.Requerido = campoRequest.requerido;
+            campo.Requerido = campoRequest.requerido ? 1 : 0;
             campo.Label = campoRequest.label;
             campo.Placeholder = campoRequest.placeHolder;
             campo.Opciones = campoRequest.tipoCampo == "Opciones" ? campoRequest.opciones : "";
-            campo.Editable = campoRequest.editable;
+            campo.Editable = campoRequest.editable ? 1 : 0;
             try
             {
                 await campoLogic.addCampo(campo);
@@ -203,11 +218,11 @@ namespace ApiHandler.Controllers.Catalog
             campo.FlujoId = campoRequest.flujoId;
             campo.Tipo = campoRequest.tipoCampo;
             campo.Orden = campoRequest.orden;
-            campo.Requerido = campoRequest.requerido;
+            campo.Requerido = campoRequest.requerido ? 1 : 0;
             campo.Label = campoRequest.label;
             campo.Placeholder = campoRequest.placeHolder;
             campo.Opciones = campoRequest.tipoCampo == "Opciones" ? campoRequest.opciones : "";
-            campo.Editable = campoRequest.editable;
+            campo.Editable = campoRequest.editable ? 1 : 0;
             try
             {
                 campo = await campoLogic.editCampo(campo);
@@ -300,7 +315,7 @@ namespace ApiHandler.Controllers.Catalog
                 response.message = "Campo no encontrada";
                 return Ok(response);
             }
-            campo.Activo = false;
+            campo.Activo = 0;
             try
             {
                 campo = await campoService.EditAsync(campo);

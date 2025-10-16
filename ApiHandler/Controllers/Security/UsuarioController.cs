@@ -37,8 +37,8 @@ namespace ApiHandler.Controllers.Security
                     id = u.Id,
                     username = u.Username,
                     perfil = u.Perfil,
-                    operativo = u.Operativo,
-                    activo = u.Activo
+                    operativo = u.Operativo == 1 ? true : false,
+                    activo = u.Activo == 1 ? true : false
                 });
             }
             catch (Exception ex)
@@ -76,7 +76,10 @@ namespace ApiHandler.Controllers.Security
             response.message = "Usuario creado correctamente";
             try
             {
-                Usuario user = new Usuario(0, userRequest.username ?? "", userRequest.perfil ?? "", true);
+                Usuario user = new Usuario(0, userRequest.username ?? "", userRequest.perfil ?? "", 1)
+                {
+                    Operativo = userRequest.operativo ? 1 : 0
+                };
                 response.data = await usuarioService.createAsync(user);
             }
             catch (Exception ex)
@@ -122,7 +125,7 @@ namespace ApiHandler.Controllers.Security
                 }
                 user.Username = userRequest.username ?? "";
                 user.Perfil = userRequest.perfil ?? "";
-                user.Operativo = userRequest.operativo;
+                user.Operativo = userRequest.operativo ? 1 : 0;
                 try
                 {
                     user = await usuarioService.updateAsync(user);
@@ -166,7 +169,7 @@ namespace ApiHandler.Controllers.Security
                     response.message = "Usuario no encontrado";
                     return Ok(response);
                 }
-                usuario.Activo = false;
+                usuario.Activo = 0;
                 await usuarioService.updateAsync(usuario);
             }
             catch (Exception ex)
@@ -204,8 +207,8 @@ namespace ApiHandler.Controllers.Security
                     id = usuario.Id,
                     username = usuario.Username,
                     perfil = usuario.Perfil,
-                    operativo = usuario.Operativo,
-                    activo = usuario.Activo
+                    operativo = usuario.Operativo == 1 ? true : false,
+                    activo = usuario.Activo == 1 ? true : false
                 };
             }
             catch (Exception ex)

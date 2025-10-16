@@ -36,7 +36,7 @@ namespace ApiHandler.Controllers.Catalog
                 {
                     id = r.Id,
                     descripcion = r.Descripcion,
-                    activo = r.Activo
+                    activo = r.Activo == 1 ? true : false
                 });
             }
             catch (Exception ex)
@@ -75,7 +75,7 @@ namespace ApiHandler.Controllers.Catalog
             response.message = "Remitente creado correctamente";
             try
             {
-                Remitente remitente = new Remitente(0, remitenteRequest.descripcion, true);
+                Remitente remitente = new Remitente(0, remitenteRequest.descripcion, 1);
                 response.data = await remitenteService.createAsync(remitente);
             }
             catch (Exception ex)
@@ -163,7 +163,7 @@ namespace ApiHandler.Controllers.Catalog
                     response.message = "Remitente no encontrado";
                     return Ok(response);
                 }
-                remitente.Activo = false;
+                remitente.Activo = 0;
                 await remitenteService.updateAsync(remitente);
             }
             catch (Exception ex)
@@ -201,7 +201,7 @@ namespace ApiHandler.Controllers.Catalog
                 {
                     id = remitente.Id,
                     descripcion = remitente.Descripcion,
-                    activo = remitente.Activo
+                    activo = remitente.Activo == 1 ? true : false
                 };
             }
             catch (Exception ex)

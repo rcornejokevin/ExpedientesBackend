@@ -36,7 +36,7 @@ public class LoginController : ControllerBase
                 return Ok(response);
             }
             Usuario? user = await authService.LoginSuccessAsync(request.username, request.password);
-            if (user == null || (user != null && user.Operativo == false))
+            if (user == null || user.Operativo == 0)
             {
                 response.code = "999";
                 response.message = "El usuario y la contraseña son incorrectos";

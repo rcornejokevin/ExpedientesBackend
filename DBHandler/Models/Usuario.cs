@@ -10,7 +10,7 @@ namespace DBHandler.Models
     public class Usuario
     {
         public Usuario() { }
-        public Usuario(int Id, string Username, string Perfil, bool Activo)
+        public Usuario(int Id, string Username, string Perfil, int Activo)
         {
             this.Id = Id;
             this.Username = Username;
@@ -28,10 +28,8 @@ namespace DBHandler.Models
         [MaxLength(50)]
         public string Perfil { get; set; } = null!;
         [Required]
-        [Column(TypeName = "NUMBER(1)")]
-        public bool Operativo { get; set; } = true;
+        public int Operativo { get; set; } = 1;
         [Required]
-        [Column(TypeName = "NUMBER(1)")]
-        public bool Activo { get; set; } = true;
+        public int Activo { get; set; } = 1;
     }
 }

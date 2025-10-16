@@ -61,6 +61,15 @@ namespace BusinessLogic.Services
                 Archivo = fileLogic.ConvertFileToBase64(expediente.Ubicacion + expediente.NombreArchivoHash)
             };
         }
+        public object GetDocumentDetail(ExpedienteDetalle expedienteDetalle)
+        {
+
+            return new
+            {
+                expedienteDetalle.NombreArchivo,
+                Archivo = fileLogic.ConvertFileToBase64(expedienteDetalle.Ubicacion + expedienteDetalle.NombreArchivoHash)
+            };
+        }
         public bool userCanChangeState(string state, Usuario usuario)
         {
             if (usuario.Perfil != "ADMINISTRADOR" && state == "Archivado") return false;
@@ -68,7 +77,7 @@ namespace BusinessLogic.Services
         }
         public bool caseCanChangeState(Expediente expediente)
         {
-            if (expediente.Etapa.FinDeFlujo)
+            if (expediente.Etapa.FinDeFlujo == 1)
             {
                 return true;
             }
@@ -236,10 +245,6 @@ namespace BusinessLogic.Services
             {
                 throw new ArgumentException("La etapa no existe.");
             }
-            if (etapaNew.Orden < etapaOld.Orden)
-            {
-                throw new ArgumentException("La nueva etapa debe ser mayor en orden que la anterior.");
-            }
             EtapaDetalle? subEtapaOld = null;
             EtapaDetalle? subEtapaNew = null;
             if (oldExpediente.EtapaDetalleId != null)
@@ -256,13 +261,6 @@ namespace BusinessLogic.Services
                 if (subEtapaNew == null)
                 {
                     throw new ArgumentException("La subetapa no existe.");
-                }
-            }
-            if (subEtapaNew != null && subEtapaOld != null)
-            {
-                if (etapaOld.Id == etapaNew.Id && subEtapaNew.Orden < subEtapaOld.Orden)
-                {
-                    throw new ArgumentException("La nueva subetapa debe ser mayor en orden que la anterior.");
                 }
             }
             return true;

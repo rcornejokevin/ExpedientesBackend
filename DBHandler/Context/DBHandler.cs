@@ -1,13 +1,19 @@
-
-
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using DBHandler.Models;
+using Microsoft.Extensions.Configuration;
+
 namespace DBHandler.Context
 {
     public class DBHandlerContext : DbContext
     {
-        public DBHandlerContext(DbContextOptions<DBHandlerContext> options) : base(options) { }
+        private readonly string defaultSchema;
+        public DBHandlerContext(DbContextOptions<DBHandlerContext> options, IConfiguration configuration) : base(options)
+        {
+            var configuredSchema = configuration["DatabaseSchemas:App"];
+            defaultSchema = string.IsNullOrWhiteSpace(configuredSchema)
+                ? "TANGRAM"
+                : configuredSchema;
+        }
 
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Flujo> Flujos { get; set; }
@@ -18,9 +24,10 @@ namespace DBHandler.Context
         public DbSet<ExpedienteDetalle> ExpedienteDetalles { get; set; }
         public DbSet<ExpedienteNotas> ExpedienteNotas { get; set; }
         public DbSet<Remitente> Remitentes { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //Tables
+            modelBuilder.HasDefaultSchema(defaultSchema);
             modelBuilder.Entity<Usuario>().ToTable("USUARIOS");
             modelBuilder.Entity<Flujo>().ToTable("FLUJOS");
             modelBuilder.Entity<Etapa>().ToTable("ETAPAS");
@@ -30,16 +37,27 @@ namespace DBHandler.Context
             modelBuilder.Entity<ExpedienteDetalle>().ToTable("EXPEDIENTE_DETALLES");
             modelBuilder.Entity<Remitente>().ToTable("REMITENTE");
             modelBuilder.Entity<ExpedienteNotas>().ToTable("EXPEDIENTE_NOTAS");
+
             base.OnModelCreating(modelBuilder);
         }
     }
+
     public class LoginDbContext : DbContext
     {
-        public LoginDbContext(DbContextOptions<LoginDbContext> options) : base(options) { }
+        private readonly string defaultSchema;
+
+        public LoginDbContext(DbContextOptions<LoginDbContext> options, IConfiguration configuration) : base(options)
+        {
+            var configuredSchema = configuration["DatabaseSchemas:Login"];
+            defaultSchema = string.IsNullOrWhiteSpace(configuredSchema)
+                ? "SIA"
+                : configuredSchema;
+        }
 
         public DbSet<UsuariosNida> UsuariosNidas { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.HasDefaultSchema(defaultSchema);
             modelBuilder.Entity<UsuariosNida>().ToTable("USUARIOSNIDA");
             base.OnModelCreating(modelBuilder);
         }

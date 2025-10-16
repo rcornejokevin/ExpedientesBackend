@@ -40,7 +40,7 @@ namespace DBHandler.Service.Catalog
         }
         public async Task deleteAsync(Remitente remitente)
         {
-            remitente.Activo = false;
+            remitente.Activo = 0;
             _dbContext.Remitentes.Update(remitente);
             try
             {
@@ -55,13 +55,13 @@ namespace DBHandler.Service.Catalog
         public async Task<List<Remitente>> GetAllAsync()
         {
             return await _dbContext.Remitentes
-                .Where(u => u.Activo)
+                .Where(u => u.Activo == 1)
                 .ToListAsync();
         }
         public async Task<Remitente?> getRemitenteById(int? id)
         {
             return await _dbContext.Remitentes
-                 .Where(u => u.Activo)
+                 .Where(u => u.Activo == 1)
                  .Where(u => u.Id == id)
                 .FirstOrDefaultAsync();
         }
