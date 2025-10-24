@@ -8,6 +8,13 @@ namespace ApiHandler.Models.Security
         public string username { get; set; } = String.Empty;
         [Required(ErrorMessage = "La contraseña es requerida")]
         public string password { get; set; } = String.Empty;
+        [Required(ErrorMessage = "El dispositivo es requerido")]
+        public string device { get; set; } = String.Empty;
+    }
+    public class TwoFactorRequest
+    {
+        [Required(ErrorMessage = "El token es requerido")]
+        public string token { get; set; } = String.Empty;
     }
     public class NewUsuarioRequest
     {
@@ -30,5 +37,11 @@ namespace ApiHandler.Models.Security
         public string perfil { get; set; } = String.Empty;
         [Required(ErrorMessage = "El campo 'operativo' es obligatorio")]
         public bool operativo { get; set; }
+    }
+    public class ChangePasswordRequest
+    {
+        public int id { get; set; }
+        [Required(ErrorMessage = "La nueva contraseña es requerida")]
+        public string newPassword { get; set; } = String.Empty;
     }
 }

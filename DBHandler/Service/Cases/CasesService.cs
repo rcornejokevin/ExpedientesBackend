@@ -159,5 +159,22 @@ namespace DBHandler.Service.Catalog
             await _context.SaveChangesAsync();
             return expediente;
         }
+        public async Task<List<Expediente>> GetByIdsAsync(IEnumerable<int> ids)
+        {
+            var idList = ids?.Distinct().Where(id => id > 0).ToList() ?? new List<int>();
+            if (idList.Count == 0)
+            {
+                return new List<Expediente>();
+            }
+
+            return await _context.Expedientes
+                .Where(e => idList.Contains(e.Id))
+                .Where(e => e.Activo == 1)
+                .Include(e => e.Etapa)
+                .Include(e => e.EtapaDetalle)
+                .Include(e => e.Usuario)
+                .Include(e => e.Remitente)
+                .ToListAsync();
+        }
     }
 }

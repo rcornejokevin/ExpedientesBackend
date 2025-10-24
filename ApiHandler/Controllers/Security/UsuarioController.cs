@@ -11,11 +11,13 @@ namespace ApiHandler.Controllers.Security
     public class UsuarioController : Controller
     {
         private readonly UsuarioService usuarioService;
+        private readonly AuthService authService;
         private readonly Jwt jwt;
-        public UsuarioController(UsuarioService usuarioService, Jwt jwt)
+        public UsuarioController(UsuarioService usuarioService, AuthService authService, Jwt jwt)
         {
             this.usuarioService = usuarioService;
             this.jwt = jwt;
+            this.authService = authService;
         }
         [HttpGet("list")]
         public async Task<IActionResult> List([FromHeader] string Authorization)
@@ -81,6 +83,89 @@ namespace ApiHandler.Controllers.Security
                     Operativo = userRequest.operativo ? 1 : 0
                 };
                 response.data = await usuarioService.createAsync(user);
+            }
+            catch (Exception ex)
+            {
+                response.code = "500";
+                response.message = ex.Message;
+                response.data = ex.StackTrace;
+                return Ok(response);
+            }
+            return Ok(response);
+        }
+        [HttpPut("changePassword")]
+        public async Task<IActionResult> ChangePassword([FromHeader] string Authorization, [FromBody] ChangePasswordRequest changePasswordRequest)
+        {
+            ResponseApi response = new ResponseApi();
+            if (!jwt.ValidateJwtToken(Authorization))
+            {
+                response.code = "401";
+                response.message = "Unauthorized";
+                return Ok(response);
+            }
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => string.IsNullOrWhiteSpace(e.ErrorMessage) ? e.Exception?.Message ?? "Solicitud inválida" : e.ErrorMessage)
+                    .ToList();
+                response.code = "400";
+                response.message = errors.FirstOrDefault() ?? "Solicitud inválida";
+                response.data = errors;
+                return Ok(response);
+            }
+            response.code = "000";
+            response.message = "Edición de usuario";
+            try
+            {
+                Usuario? user;
+                if (changePasswordRequest.id > 0)
+                {
+                    user = await usuarioService.getUsuarioByIdAsync(changePasswordRequest.id);
+                }
+                else
+                {
+                    string? username = jwt.GetUsernameFromAuthorization(Authorization);
+                    if (username == null)
+                    {
+                        response.code = "401";
+                        response.message = "Unauthorized";
+                        return Ok(response);
+                    }
+                    user = await usuarioService.getUsuarioByUsername(username) ?? new Usuario();
+                }
+                if (user == null)
+                {
+                    response.code = "404";
+                    response.message = "Usuario no encontrado";
+                    return Ok(response);
+                }
+                UsuariosNida? externalUser = await authService.GetExternalUserByUsernameAsync(user.Username);
+                if (externalUser == null)
+                {
+                    response.code = "404";
+                    response.message = "Usuario externo no encontrado";
+                    return Ok(response);
+                }
+                try
+                {
+                    if (await authService.ChangePasswordByUsernameAsync(user.Username, changePasswordRequest.newPassword))
+                    {
+                        response.message = "Contraseña cambiada correctamente";
+                    }
+                    else
+                    {
+                        response.code = "500";
+                        response.message = "Error al cambiar la contraseña";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    response.code = "500";
+                    response.message = ex.Message;
+                    response.data = ex.StackTrace;
+                    return Ok(response);
+                }
             }
             catch (Exception ex)
             {

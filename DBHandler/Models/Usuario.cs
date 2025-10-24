@@ -31,5 +31,11 @@ namespace DBHandler.Models
         public int Operativo { get; set; } = 1;
         [Required]
         public int Activo { get; set; } = 1;
+        [MaxLength(150)]
+        public string? Terminal { get; set; }
+        [MaxLength(150)]
+        public string? NuevaTerminal { get; set; }
+        [MaxLength(150)]
+        public string? Email { get; set; }
     }
 }

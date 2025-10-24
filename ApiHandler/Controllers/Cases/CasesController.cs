@@ -552,8 +552,8 @@ namespace ApiHandler.Controllers.Catalog
             }
             return Ok(response);
         }
-        [HttpGet("detail/{id}")]
-        public async Task<IActionResult> getDetail([FromHeader] string Authorization, int id)
+        [HttpGet("detail/{id}/{viewMode?}")]
+        public async Task<IActionResult> getDetail([FromHeader] string Authorization, int id, int viewMode = 1)
         {
             ResponseApi response = new ResponseApi();
             if (!jwt.ValidateJwtToken(Authorization))
@@ -566,28 +566,130 @@ namespace ApiHandler.Controllers.Catalog
             response.message = "Lista de Expediente Detalle";
             try
             {
-                List<ExpedienteDetalle> expedienteDetalle = await casesDetailService.GetAllByExpedienteIdAsync(id);
-                response.data = expedienteDetalle
-                    .OrderBy(d => d.Fecha)
-                    .Select(d => new
+                if (viewMode == 2)
+                {
+                    Expediente? expediente = await casesService.GetByIdAsync(id);
+                    if (expediente == null)
                     {
-                        d.Id,
-                        d.Fecha,
-                        d.Ubicacion,
-                        d.NombreArchivo,
-                        d.NombreArchivoHash,
-                        d.EtapaAnteriorId,
-                        d.EtapaDetalleAnteriorId,
-                        d.EtapaNuevaId,
-                        d.EtapaDetalleNuevaId,
-                        d.AsesorAnteriorId,
-                        d.AsesorNuevorId,
-                        asesorNuevo = d.AsesorNuevo.Username,
-                        etapa = d.EtapaNueva.Nombre,
-                        subEtapa = d.EtapaDetalleNuevaId != null ? d.EtapaDetalleNueva?.Nombre : "",
-                        Estatus = d.EstatusNuevo,
-                    })
-                    .ToList();
+                        response.code = "404";
+                        response.message = "Expediente no encontrado";
+                        return Ok(response);
+                    }
+
+                    List<ExpedienteDetalle> expedienteDetalle = await casesDetailService.GetAllByExpedienteIdAsync(id);
+                    var detalleProyectado = expedienteDetalle
+                        .OrderBy(d => d.Fecha)
+                        .Select(d => new
+                        {
+                            d.ExpedienteId,
+                            Detail = new
+                            {
+                                d.Id,
+                                d.Fecha,
+                                d.Ubicacion,
+                                d.NombreArchivo,
+                                d.NombreArchivoHash,
+                                d.EtapaAnteriorId,
+                                d.EtapaDetalleAnteriorId,
+                                d.EtapaNuevaId,
+                                d.EtapaDetalleNuevaId,
+                                d.AsesorAnteriorId,
+                                d.AsesorNuevorId,
+                                asesorNuevo = d.AsesorNuevo.Username,
+                                etapa = d.EtapaNueva.Nombre,
+                                subEtapa = d.EtapaDetalleNuevaId != null ? d.EtapaDetalleNueva?.Nombre : "",
+                                Estatus = d.EstatusNuevo,
+                            }
+                        })
+                        .ToList();
+
+                    var detallePorExpediente = detalleProyectado
+                        .GroupBy(d => d.ExpedienteId)
+                        .ToDictionary(g => g.Key, g => g.Select(item => item.Detail).ToList());
+
+                    var detallesExpedienteActual = detallePorExpediente.TryGetValue(id, out var detallesActuales)
+                        ? detallesActuales.Cast<object>().ToList()
+                        : new List<object>();
+
+                    var expedientesRelacionadosIds = detallePorExpediente.Keys
+                        .Where(expedienteId => expedienteId != id)
+                        .ToList();
+
+                    var expedientesRelacionados = await casesService.GetByIdsAsync(expedientesRelacionadosIds);
+
+                    response.message = "Expediente y relacionados";
+                    response.data = new
+                    {
+                        expediente = new
+                        {
+                            expediente.Id,
+                            expediente.Codigo,
+                            expediente.Nombre,
+                            expediente.Asunto,
+                            expediente.Estatus,
+                            expediente.FechaIngreso,
+                            expediente.FechaActualizacion,
+                            expediente.AsesorId,
+                            expediente.ExpedienteRelacionadoId,
+                            etapa = expediente.Etapa?.Nombre,
+                            subEtapa = expediente.EtapaDetalle?.Nombre,
+                            detalles = detallesExpedienteActual
+                        },
+                        relacionados = expedientesRelacionados
+                            .Select(expedienteRelacionado =>
+                            {
+                                var detallesRelacionados = detallePorExpediente.TryGetValue(expedienteRelacionado.Id, out var detallesLista)
+                                    ? detallesLista.Cast<object>().ToList()
+                                    : new List<object>();
+
+                                return new
+                                {
+                                    expediente = new
+                                    {
+                                        expedienteRelacionado.Id,
+                                        expedienteRelacionado.Codigo,
+                                        expedienteRelacionado.Nombre,
+                                        expedienteRelacionado.Asunto,
+                                        expedienteRelacionado.Estatus,
+                                        expedienteRelacionado.FechaIngreso,
+                                        expedienteRelacionado.FechaActualizacion,
+                                        expedienteRelacionado.AsesorId,
+                                        expedienteRelacionado.ExpedienteRelacionadoId,
+                                        etapa = expedienteRelacionado.Etapa?.Nombre,
+                                        subEtapa = expedienteRelacionado.EtapaDetalle?.Nombre
+                                    },
+                                    detalles = detallesRelacionados
+                                };
+                            })
+                            .ToList()
+                    };
+                }
+                else
+                {
+                    List<ExpedienteDetalle> expedienteDetalle = await casesDetailService.GetAllByExpedienteIdAsync(id);
+                    response.data = expedienteDetalle
+                        .Where(d => d.ExpedienteId == id)
+                        .OrderBy(d => d.Fecha)
+                        .Select(d => new
+                        {
+                            d.Id,
+                            d.Fecha,
+                            d.Ubicacion,
+                            d.NombreArchivo,
+                            d.NombreArchivoHash,
+                            d.EtapaAnteriorId,
+                            d.EtapaDetalleAnteriorId,
+                            d.EtapaNuevaId,
+                            d.EtapaDetalleNuevaId,
+                            d.AsesorAnteriorId,
+                            d.AsesorNuevorId,
+                            asesorNuevo = d.AsesorNuevo.Username,
+                            etapa = d.EtapaNueva.Nombre,
+                            subEtapa = d.EtapaDetalleNuevaId != null ? d.EtapaDetalleNueva?.Nombre : "",
+                            Estatus = d.EstatusNuevo,
+                        })
+                        .ToList();
+                }
             }
             catch (Exception ex)
             {
