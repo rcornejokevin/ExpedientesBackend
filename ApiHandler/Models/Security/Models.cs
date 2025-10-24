@@ -20,6 +20,8 @@ namespace ApiHandler.Models.Security
     {
         [Required(ErrorMessage = "El nombre de usuario es requerido")]
         public string username { get; set; } = String.Empty;
+        [Required(ErrorMessage = "El email es requerido")]
+        public string email { get; set; } = String.Empty;
         [Required(ErrorMessage = "El perfil es requerido")]
         [RegularExpression("^(ADMINISTRADOR|RECEPCIÓN|IT|ASESOR|PROCURADOR)$", ErrorMessage = "Perfil inválido")]
         public string perfil { get; set; } = String.Empty;
@@ -32,6 +34,8 @@ namespace ApiHandler.Models.Security
         public int id { get; set; }
         [Required(ErrorMessage = "El nombre de usuario es requerido")]
         public string username { get; set; } = String.Empty;
+        [Required(ErrorMessage = "El email es requerido")]
+        public string email { get; set; } = String.Empty;
         [Required(ErrorMessage = "El perfil es requerido")]
         [RegularExpression("^(ADMINISTRADOR|RECEPCIÓN|IT|ASESOR|PROCURADOR)$", ErrorMessage = "Perfil inválido")]
         public string perfil { get; set; } = String.Empty;

@@ -40,7 +40,8 @@ namespace ApiHandler.Controllers.Security
                     username = u.Username,
                     perfil = u.Perfil,
                     operativo = u.Operativo == 1 ? true : false,
-                    activo = u.Activo == 1 ? true : false
+                    activo = u.Activo == 1 ? true : false,
+                    email = u.Email
                 });
             }
             catch (Exception ex)
@@ -82,6 +83,7 @@ namespace ApiHandler.Controllers.Security
                 {
                     Operativo = userRequest.operativo ? 1 : 0
                 };
+                user.Email = userRequest.email ?? "";
                 response.data = await usuarioService.createAsync(user);
             }
             catch (Exception ex)
@@ -211,6 +213,7 @@ namespace ApiHandler.Controllers.Security
                 user.Username = userRequest.username ?? "";
                 user.Perfil = userRequest.perfil ?? "";
                 user.Operativo = userRequest.operativo ? 1 : 0;
+                user.Email = userRequest.email ?? "";
                 try
                 {
                     user = await usuarioService.updateAsync(user);
