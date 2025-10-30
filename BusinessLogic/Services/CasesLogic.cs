@@ -72,7 +72,7 @@ namespace BusinessLogic.Services
         }
         public bool userCanChangeState(string state, Usuario usuario)
         {
-            if (usuario.Perfil != "ADMINISTRADOR" && state == "Archivado") return false;
+            if (usuario.Perfil != "ADMINISTRADOR" && usuario.Perfil != "DIRECTOR" && state == "Archivado") return false;
             return true;
         }
         public bool caseCanChangeState(Expediente expediente)
@@ -227,7 +227,7 @@ namespace BusinessLogic.Services
         }
         public Boolean userCanChangeCase(Usuario user)
         {
-            if (user.Perfil == "ADMINISTRADOR")
+            if (user.Perfil == "ADMINISTRADOR" || user.Perfil == "DIRECTOR")
             {
                 return true;
             }
@@ -287,7 +287,6 @@ namespace BusinessLogic.Services
 
             var details = await casesDetailService.GetAllByDateRangeWithEtapaAsync(monthStart, nextMonthStart);
 
-            // Construir intervalos de asignación (arrastrar hasta cambio de asesor)
             var detailsByExp = details
                 .OrderBy(d => d.Fecha)
                 .GroupBy(d => d.ExpedienteId)
@@ -321,24 +320,6 @@ namespace BusinessLogic.Services
                 .Select(offset => monthStart.AddDays(offset).Date)
                 .ToList();
 
-            var series = daysInMonth.Select(day => new
-            {
-                date = day.Day.ToString(),
-                assigned = assignmentIntervals
-                    .Where(iv => day >= iv.start && day < iv.end)
-                    .Select(iv => iv.expedienteId)
-                    .Distinct()
-                    .Count(),
-                attended = details
-                    .Where(d => d.AsesorNuevorId == user.Id)
-                    .Where(d => !string.IsNullOrWhiteSpace(d.EstatusAnterior) && d.EstatusAnterior.Trim().Equals("Abierto", StringComparison.OrdinalIgnoreCase))
-                    .Where(d => !string.IsNullOrWhiteSpace(d.EstatusNuevo) && d.EstatusNuevo.Trim().Equals("Cerrado", StringComparison.OrdinalIgnoreCase))
-                    .Where(d => d.Fecha.Date == day)
-                    .Select(d => d.ExpedienteId)
-                    .Distinct()
-                    .Count()
-            }).ToList();
-
             var assignedEvents = details
                 .Where(d => d.AsesorNuevorId == user.Id)
                 .Where(d => !string.IsNullOrWhiteSpace(d.EstatusNuevo) && d.EstatusNuevo.Trim().Equals("Abierto", StringComparison.OrdinalIgnoreCase))
@@ -348,6 +329,40 @@ namespace BusinessLogic.Services
                 .Where(d => !string.IsNullOrWhiteSpace(d.EstatusAnterior) && d.EstatusAnterior.Trim().Equals("Abierto", StringComparison.OrdinalIgnoreCase))
                 .Where(d => !string.IsNullOrWhiteSpace(d.EstatusNuevo) && d.EstatusNuevo.Trim().Equals("Cerrado", StringComparison.OrdinalIgnoreCase))
                 .ToList();
+
+            var attendedEventsByDay = attendedEvents
+                .GroupBy(d => d.Fecha.Date)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(x => x.ExpedienteId).Distinct().ToList()
+                );
+
+            // Track expedientes cerrados acumulados dentro del mes
+            var cumulativeAttended = new HashSet<int>();
+            var series = new List<object>();
+            foreach (var day in daysInMonth)
+            {
+                if (attendedEventsByDay.TryGetValue(day, out var closedExpedients))
+                {
+                    foreach (var expedienteId in closedExpedients)
+                    {
+                        cumulativeAttended.Add(expedienteId);
+                    }
+                }
+
+                var assignedCount = assignmentIntervals
+                    .Where(iv => day >= iv.start && day < iv.end)
+                    .Select(iv => iv.expedienteId)
+                    .Distinct()
+                    .Count();
+
+                series.Add(new
+                {
+                    date = day.Day.ToString(),
+                    assigned = assignedCount,
+                    attended = cumulativeAttended.Count
+                });
+            }
 
             var assignedUniqueExp = assignedEvents
                 .GroupBy(d => d.ExpedienteId)

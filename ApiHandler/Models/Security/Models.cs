@@ -23,7 +23,7 @@ namespace ApiHandler.Models.Security
         [Required(ErrorMessage = "El email es requerido")]
         public string email { get; set; } = String.Empty;
         [Required(ErrorMessage = "El perfil es requerido")]
-        [RegularExpression("^(ADMINISTRADOR|RECEPCIÓN|IT|ASESOR|PROCURADOR)$", ErrorMessage = "Perfil inválido")]
+        [RegularExpression("^(ADMINISTRADOR|RECEPCIÓN|IT|ASESOR|PROCURADOR|DIRECTOR)$", ErrorMessage = "Perfil inválido")]
         public string perfil { get; set; } = String.Empty;
         [Required(ErrorMessage = "El campo 'operativo' es obligatorio")]
         public bool operativo { get; set; }
@@ -37,7 +37,7 @@ namespace ApiHandler.Models.Security
         [Required(ErrorMessage = "El email es requerido")]
         public string email { get; set; } = String.Empty;
         [Required(ErrorMessage = "El perfil es requerido")]
-        [RegularExpression("^(ADMINISTRADOR|RECEPCIÓN|IT|ASESOR|PROCURADOR)$", ErrorMessage = "Perfil inválido")]
+        [RegularExpression("^(ADMINISTRADOR|RECEPCIÓN|IT|ASESOR|PROCURADOR|DIRECTOR)$", ErrorMessage = "Perfil inválido")]
         public string perfil { get; set; } = String.Empty;
         [Required(ErrorMessage = "El campo 'operativo' es obligatorio")]
         public bool operativo { get; set; }

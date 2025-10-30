@@ -381,7 +381,7 @@ namespace ApiHandler.Controllers.Catalog
                 {
                     filters.UsuarioAsesor = user.Id;
                 }
-                else if (user.Perfil != "ADMINISTRADOR" && user.Perfil != "RECEPCIÓN" && (user.Perfil != "PROCURADOR" || reporteId != 1))
+                else if (user.Perfil != "ADMINISTRADOR" && user.Perfil != "DIRECTOR" && user.Perfil != "RECEPCIÓN" && (user.Perfil != "PROCURADOR" || reporteId != 1))
                 {
                     filters.Usuario = user.Id;
                 }

@@ -13,7 +13,7 @@ builder.Services.AddCors(opt =>
 {
     opt.AddPolicy(localCors, b =>
     {
-        b.WithOrigins("https://preprod-sideju-fe.marn.gob.gt",
+        b.WithOrigins("https://preprod-sideju-fe.marn.gob.gt", "https://sideju.marn.gob.gt",
                       "http://localhost:5173")
          .WithMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
          .WithHeaders("Content-Type", "Authorization", "X-Requested-With", "X-CSRF-Token")

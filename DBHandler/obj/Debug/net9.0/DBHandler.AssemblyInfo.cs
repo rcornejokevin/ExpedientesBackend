@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DBHandler")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+18317e75b67c41c994045fbe4dc4dfdbf9bc5611")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d5e952859b77711b4b4b81dfac8185a18e57e034")]
 [assembly: System.Reflection.AssemblyProductAttribute("DBHandler")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DBHandler")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
